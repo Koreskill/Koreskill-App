@@ -4,22 +4,38 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  ClipboardPaste,
   Download,
   ImagePlus,
   Layers3,
   LoaderCircle,
+  Maximize2,
   Megaphone,
   Play,
   RotateCcw,
   Sparkles,
   WandSparkles,
+  X,
 } from "lucide-react";
 import Link from "next/link";
-import { ChangeEvent, useMemo, useRef, useState } from "react";
+import {
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 type Quality = "low" | "medium" | "high" | "auto";
 type Flow = "direct" | "pipeline";
 type StageStatus = "idle" | "running" | "succeeded" | "failed";
+type PasteFeedback = {
+  kind: "success" | "error";
+  message: string;
+};
+
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 type Stage = {
   id: "product" | "environment" | "advertisement";
@@ -176,13 +192,15 @@ export function CreativeStudio() {
   const [file, setFile] = useState<File | null>(null);
   const [sourceUrl, setSourceUrl] = useState("");
   const [quality, setQuality] = useState<Quality>("low");
-  const [aspectRatio, setAspectRatio] = useState("4:5");
+  const [aspectRatio, setAspectRatio] = useState("9:16");
   const [directPrompt, setDirectPrompt] = useState(DIRECT_PROMPT);
   const [directStatus, setDirectStatus] = useState<StageStatus>("idle");
   const [directResult, setDirectResult] = useState("");
   const [directError, setDirectError] = useState("");
   const [stages, setStages] = useState<Stage[]>(INITIAL_STAGES);
   const [pipelineRunning, setPipelineRunning] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [pasteFeedback, setPasteFeedback] = useState<PasteFeedback | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const completedStages = stages.filter(
@@ -195,8 +213,12 @@ export function CreativeStudio() {
     [completedStages, flow, quality],
   );
 
-  const selectFile = async (selected: File) => {
-    if (!["image/jpeg", "image/png", "image/webp"].includes(selected.type)) {
+  const selectFile = useCallback(async (selected: File) => {
+    if (!ACCEPTED_IMAGE_TYPES.includes(selected.type)) {
+      setPasteFeedback({
+        kind: "error",
+        message: "La imagen debe ser JPG, PNG o WEBP.",
+      });
       return;
     }
     const optimized = await optimizeImage(selected);
@@ -207,6 +229,101 @@ export function CreativeStudio() {
     setDirectStatus("idle");
     setDirectError("");
     setStages(INITIAL_STAGES.map((stage) => ({ ...stage })));
+    setPasteFeedback({
+      kind: "success",
+      message: "Imagen cargada correctamente.",
+    });
+  }, [sourceUrl]);
+
+  useEffect(() => {
+    const handlePaste = (event: ClipboardEvent) => {
+      const clipboard = event.clipboardData;
+      const pastedFile = Array.from(clipboard?.files || []).find((item) =>
+        ACCEPTED_IMAGE_TYPES.includes(item.type),
+      );
+      const imageItem = Array.from(clipboard?.items || []).find((item) =>
+        ACCEPTED_IMAGE_TYPES.includes(item.type),
+      );
+      const pastedImage = pastedFile || imageItem?.getAsFile();
+      if (!pastedImage) return;
+      event.preventDefault();
+      void selectFile(pastedImage);
+    };
+
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [selectFile]);
+
+  useEffect(() => {
+    if (!previewUrl) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setPreviewUrl("");
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [previewUrl]);
+
+  const pasteImageFromClipboard = async () => {
+    setPasteFeedback(null);
+
+    try {
+      if (!window.isSecureContext) {
+        throw new Error(
+          "Chrome necesita que la web tenga HTTPS para usar el botón Pegar.",
+        );
+      }
+
+      if (!navigator.clipboard?.read) {
+        throw new Error(
+          "Este navegador no permite leer imágenes con el botón. Copiá la imagen y presioná Ctrl+V.",
+        );
+      }
+
+      const clipboardItems = await navigator.clipboard.read();
+
+      for (const clipboardItem of clipboardItems) {
+        const imageType = clipboardItem.types.find((type) =>
+          ACCEPTED_IMAGE_TYPES.includes(type),
+        );
+        if (!imageType) continue;
+
+        const imageBlob = await clipboardItem.getType(imageType);
+        const extension =
+          imageType === "image/png"
+            ? "png"
+            : imageType === "image/webp"
+              ? "webp"
+              : "jpg";
+        const pastedImage = new File(
+          [imageBlob],
+          `producto-pegado-${Date.now()}.${extension}`,
+          { type: imageType },
+        );
+
+        await selectFile(pastedImage);
+        return;
+      }
+
+      throw new Error(
+        "No encontramos una imagen copiada. Copiá la imagen y volvé a presionar Pegar imagen.",
+      );
+    } catch (error) {
+      setPasteFeedback({
+        kind: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "No pudimos pegar la imagen. Probá con Ctrl+V.",
+      });
+    }
   };
 
   const onFileInput = (event: ChangeEvent<HTMLInputElement>) => {
@@ -430,10 +547,30 @@ export function CreativeStudio() {
               <>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={sourceUrl} alt="Producto original" />
-                <button type="button" className="replace-image">
-                  <RotateCcw size={13} />
-                  Cambiar imagen
-                </button>
+                <div className="source-image-actions">
+                  <button
+                    type="button"
+                    className="replace-image"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      inputRef.current?.click();
+                    }}
+                  >
+                    <RotateCcw size={13} />
+                    Cambiar imagen
+                  </button>
+                  <button
+                    type="button"
+                    className="paste-image-secondary"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      void pasteImageFromClipboard();
+                    }}
+                  >
+                    <ClipboardPaste size={13} />
+                    Pegar otra
+                  </button>
+                </div>
               </>
             ) : (
               <>
@@ -442,7 +579,30 @@ export function CreativeStudio() {
                 </span>
                 <strong>Cargá la imagen principal</strong>
                 <small>Arrastrá o hacé clic · JPG, PNG o WEBP</small>
+                <button
+                  type="button"
+                  className="creative-paste-button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void pasteImageFromClipboard();
+                  }}
+                >
+                  <ClipboardPaste size={14} />
+                  Pegar imagen
+                </button>
+                <small className="creative-paste-hint">
+                  También funciona copiando la imagen y presionando Ctrl+V
+                </small>
               </>
+            )}
+            {pasteFeedback && (
+              <span
+                className={`creative-paste-feedback paste-${pasteFeedback.kind}`}
+                role="status"
+                aria-live="polite"
+              >
+                {pasteFeedback.message}
+              </span>
             )}
           </div>
 
@@ -453,10 +613,11 @@ export function CreativeStudio() {
                 value={aspectRatio}
                 onChange={(event) => setAspectRatio(event.target.value)}
               >
-                <option value="4:5">Feed 4:5</option>
                 <option value="9:16">Story 9:16</option>
+                <option value="3:4">Feed vertical 3:4</option>
                 <option value="1:1">Cuadrado 1:1</option>
                 <option value="3:2">Horizontal 3:2</option>
+                <option value="16:9">Horizontal 16:9</option>
               </select>
             </label>
             <label>
@@ -520,8 +681,19 @@ export function CreativeStudio() {
               </div>
               <div className={`creative-result-frame ratio-${aspectRatio.replace(":", "-")}`}>
                 {directResult ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={directResult} alt="Anuncio generado" />
+                  <button
+                    type="button"
+                    className="result-preview-button"
+                    onClick={() => setPreviewUrl(directResult)}
+                    aria-label="Ampliar anuncio generado"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={directResult} alt="Anuncio generado" />
+                    <span>
+                      <Maximize2 size={14} />
+                      Ampliar
+                    </span>
+                  </button>
                 ) : (
                   <div>
                     {directStatus === "running" ? (
@@ -538,16 +710,26 @@ export function CreativeStudio() {
                 )}
               </div>
               {directResult && (
-                <button
-                  type="button"
-                  className="secondary-action download-creative"
-                  onClick={() =>
-                    void downloadResult(directResult, "anuncio-final.jpg")
-                  }
-                >
-                  <Download size={15} />
-                  Descargar anuncio
-                </button>
+                <div className="creative-result-actions">
+                  <button
+                    type="button"
+                    className="secondary-action preview-creative"
+                    onClick={() => setPreviewUrl(directResult)}
+                  >
+                    <Maximize2 size={15} />
+                    Ver en pantalla completa
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-action download-creative"
+                    onClick={() =>
+                      void downloadResult(directResult, "anuncio-final.jpg")
+                    }
+                  >
+                    <Download size={15} />
+                    Descargar anuncio
+                  </button>
+                </div>
               )}
             </div>
           </section>
@@ -637,10 +819,25 @@ export function CreativeStudio() {
                   <div className="stage-result">
                     {stage.outputUrl ? (
                       <>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={stage.outputUrl} alt={`Resultado: ${stage.title}`} />
                         <button
                           type="button"
+                          className="stage-preview-button"
+                          onClick={() => setPreviewUrl(stage.outputUrl!)}
+                          aria-label={`Ampliar ${stage.title}`}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={stage.outputUrl}
+                            alt={`Resultado: ${stage.title}`}
+                          />
+                          <span>
+                            <Maximize2 size={13} />
+                            Ampliar
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          className="stage-download-button"
                           onClick={() =>
                             void downloadResult(
                               stage.outputUrl!,
@@ -681,24 +878,58 @@ export function CreativeStudio() {
                     <small>Las tres etapas se procesaron correctamente.</small>
                   </span>
                 </div>
-                <button
-                  type="button"
-                  className="primary-action"
-                  onClick={() =>
-                    void downloadResult(
-                      stages[2].outputUrl!,
-                      "anuncio-final-ruta-b.jpg",
-                    )
-                  }
-                >
-                  <Download size={15} />
-                  Descargar anuncio
-                </button>
+                <div className="pipeline-final-actions">
+                  <button
+                    type="button"
+                    className="secondary-action"
+                    onClick={() => setPreviewUrl(stages[2].outputUrl!)}
+                  >
+                    <Maximize2 size={15} />
+                    Ver en pantalla completa
+                  </button>
+                  <button
+                    type="button"
+                    className="primary-action"
+                    onClick={() =>
+                      void downloadResult(
+                        stages[2].outputUrl!,
+                        "anuncio-final-ruta-b.jpg",
+                      )
+                    }
+                  >
+                    <Download size={15} />
+                    Descargar anuncio
+                  </button>
+                </div>
               </div>
             )}
           </section>
         )}
       </div>
+
+      {previewUrl && (
+        <div
+          className="creative-lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Vista ampliada del resultado"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setPreviewUrl("");
+          }}
+        >
+          <button
+            type="button"
+            className="creative-lightbox-close"
+            onClick={() => setPreviewUrl("")}
+            aria-label="Cerrar vista ampliada"
+          >
+            <X size={20} />
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={previewUrl} alt="Resultado generado ampliado" />
+          <small>Presioná Esc o hacé clic afuera para cerrar</small>
+        </div>
+      )}
     </main>
   );
 }

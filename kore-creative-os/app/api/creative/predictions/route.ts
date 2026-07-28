@@ -4,8 +4,33 @@ import { getReplicateToken } from "@/lib/runtime";
 
 const ACCEPTED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const QUALITIES = new Set(["low", "medium", "high", "auto"]);
-const ASPECT_RATIOS = new Set(["1:1", "4:5", "9:16", "3:2", "2:3"]);
+const ASPECT_RATIOS = new Set([
+  "1:1",
+  "3:2",
+  "2:3",
+  "4:3",
+  "3:4",
+  "16:9",
+  "9:16",
+  "auto",
+  "1024x1024",
+  "1536x1024",
+  "1024x1536",
+  "1536x1152",
+  "1152x1536",
+  "2048x2048",
+  "2048x1152",
+  "1152x2048",
+  "3840x2160",
+  "2160x3840",
+]);
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
+
+function normalizeAspectRatio(value: string) {
+  // GPT Image 2 no ofrece 4:5. Aceptamos el valor anterior de la interfaz
+  // y lo convertimos al formato vertical compatible más cercano.
+  return value === "4:5" ? "3:4" : value;
+}
 
 type PredictionResponse = {
   id?: string;
@@ -37,7 +62,7 @@ export async function POST(request: Request) {
     const contentType = request.headers.get("content-type") || "";
     let prompt = "";
     let quality = "low";
-    let aspectRatio = "4:5";
+    let aspectRatio = "9:16";
     let inputImage: Blob | string | null = null;
 
     if (contentType.includes("multipart/form-data")) {
@@ -45,7 +70,9 @@ export async function POST(request: Request) {
       const file = formData.get("image");
       prompt = String(formData.get("prompt") || "").trim();
       quality = String(formData.get("quality") || "low");
-      aspectRatio = String(formData.get("aspectRatio") || "4:5");
+      aspectRatio = normalizeAspectRatio(
+        String(formData.get("aspectRatio") || "9:16"),
+      );
       if (file instanceof File) {
         if (!ACCEPTED_TYPES.has(file.type)) {
           return Response.json(
@@ -73,7 +100,7 @@ export async function POST(request: Request) {
       };
       prompt = payload.prompt?.trim() || "";
       quality = payload.quality || "low";
-      aspectRatio = payload.aspectRatio || "4:5";
+      aspectRatio = normalizeAspectRatio(payload.aspectRatio || "9:16");
       if (payload.imageUrl?.startsWith("https://")) {
         inputImage = payload.imageUrl;
       }

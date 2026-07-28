@@ -455,6 +455,28 @@ a.app-card:hover {
   font-size: 9px;
 }
 
+.creative-paste-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 13px;
+  padding: 9px 13px;
+  border: 1px solid #cfc2f4;
+  border-radius: 9px;
+  background: #6849d4;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: 0 7px 18px rgba(104, 73, 212, 0.2);
+}
+
+.creative-uploader .creative-paste-hint {
+  margin-top: 8px;
+  color: #777182;
+  font-weight: 650;
+}
+
 .creative-uploader img {
   width: 100%;
   height: 190px;
@@ -463,10 +485,17 @@ a.app-card:hover {
   background: #eceef1;
 }
 
-.replace-image {
+.source-image-actions {
   position: absolute;
   right: 10px;
   bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.replace-image,
+.paste-image-secondary {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -478,6 +507,38 @@ a.app-card:hover {
   font-size: 8px;
   font-weight: 700;
   backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+
+.paste-image-secondary {
+  background: rgba(104, 73, 212, 0.9);
+}
+
+.creative-paste-feedback {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+  max-width: calc(100% - 20px);
+  padding: 8px 10px;
+  border: 1px solid;
+  border-radius: 8px;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1.4;
+  box-shadow: 0 8px 22px rgba(26, 29, 35, 0.1);
+}
+
+.creative-paste-feedback.paste-success {
+  border-color: #bde4d1;
+  background: #effbf5;
+  color: #11784d;
+}
+
+.creative-paste-feedback.paste-error {
+  border-color: #f0c6c6;
+  background: #fff3f3;
+  color: #b43c3c;
 }
 
 .creative-options {
@@ -584,10 +645,26 @@ a.app-card:hover {
   line-height: 1.6;
 }
 
-.creative-generate,
-.download-creative {
+.creative-generate {
   width: 100%;
   margin-top: 12px;
+}
+
+.creative-result-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.creative-result-actions .secondary-action {
+  width: 100%;
+}
+
+.preview-creative {
+  border-color: #cfc2f4;
+  background: #faf8ff;
+  color: #5e43bd;
 }
 
 .creative-error {
@@ -620,6 +697,51 @@ a.app-card:hover {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+.result-preview-button,
+.stage-preview-button {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: zoom-in;
+}
+
+.result-preview-button > span,
+.stage-preview-button > span {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 8px;
+  background: rgba(17, 19, 22, 0.76);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 750;
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.result-preview-button:hover > span,
+.result-preview-button:focus-visible > span,
+.stage-preview-button:hover > span,
+.stage-preview-button:focus-visible > span {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .creative-result-frame > div {
@@ -770,10 +892,16 @@ a.app-card:hover {
   font-size: 8px;
 }
 
-.stage-result > button {
+.stage-result .stage-preview-button {
+  position: absolute;
+  inset: 0;
+}
+
+.stage-result .stage-download-button {
   position: absolute;
   right: 8px;
   bottom: 8px;
+  z-index: 2;
   width: 30px;
   height: 30px;
   display: grid;
@@ -783,6 +911,65 @@ a.app-card:hover {
   background: rgba(17, 19, 22, 0.75);
   color: #fff;
   cursor: pointer;
+}
+
+.stage-result .stage-preview-button > span {
+  right: 46px;
+  bottom: 8px;
+}
+
+.creative-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 42px;
+  background: rgba(10, 11, 14, 0.92);
+  backdrop-filter: blur(14px);
+  animation: creative-lightbox-in 160ms ease-out;
+}
+
+.creative-lightbox > img {
+  width: auto;
+  max-width: min(92vw, 1440px);
+  height: auto;
+  max-height: 86vh;
+  display: block;
+  border-radius: 12px;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.55);
+}
+
+.creative-lightbox > small {
+  position: fixed;
+  bottom: 15px;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 9px;
+}
+
+.creative-lightbox-close {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  cursor: pointer;
+}
+
+@keyframes creative-lightbox-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .stage-connector {
@@ -828,6 +1015,13 @@ a.app-card:hover {
   margin-top: 3px;
   color: #6e8d7d;
   font-size: 8px;
+}
+
+.pipeline-final-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .brand-mark {
@@ -2553,6 +2747,12 @@ a.app-card:hover {
     flex-direction: column;
   }
 
+  .creative-result-actions,
+  .pipeline-final-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
   .pipeline-stage {
     grid-template-columns: 36px minmax(0, 1fr);
     gap: 10px;
@@ -2572,6 +2772,15 @@ a.app-card:hover {
   .stage-result {
     grid-column: 1 / -1;
     min-height: 300px;
+  }
+
+  .creative-lightbox {
+    padding: 58px 14px 42px;
+  }
+
+  .creative-lightbox > img {
+    max-width: 100%;
+    max-height: 82vh;
   }
 
   .stage-connector {
