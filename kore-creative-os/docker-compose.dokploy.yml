@@ -16,6 +16,13 @@ services:
       timeout: 10s
       retries: 5
       start_period: 90s
-
+    networks:
+      - default
+      - dokploy-network
+    labels:
+      - traefik.docker.network=dokploy-network
+networks:
+  dokploy-network:
+    external: true
 volumes:
   creative_data:
