@@ -231,7 +231,7 @@ export function CreativeStudio() {
     setStages(INITIAL_STAGES.map((stage) => ({ ...stage })));
     setPasteFeedback({
       kind: "success",
-      message: "Imagen cargada correctamente.",
+      message: "✔️",
     });
   }, [sourceUrl]);
 
