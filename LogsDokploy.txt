@@ -1,0 +1,400 @@
+Initializing deployment
+Cloning Repo github.com/Koreskill/Koreskill-App.git to /etc/dokploy/compose/koreskill-app-kssgux/code: ✅
+Cloning into '/etc/dokploy/compose/koreskill-app-kssgux/code'...
+remote: Enumerating objects: 129, done.
+remote: Counting objects:   0% (1/129)        
+remote: Counting objects:   1% (2/129)        
+remote: Counting objects:   2% (3/129)        
+remote: Counting objects:   3% (4/129)        
+remote: Counting objects:   4% (6/129)        
+remote: Counting objects:   5% (7/129)        
+remote: Counting objects:   6% (8/129)        
+remote: Counting objects:   7% (10/129)        
+remote: Counting objects:   8% (11/129)        
+remote: Counting objects:   9% (12/129)        
+remote: Counting objects:  10% (13/129)        
+remote: Counting objects:  11% (15/129)        
+remote: Counting objects:  12% (16/129)        
+remote: Counting objects:  13% (17/129)        
+remote: Counting objects:  14% (19/129)        
+remote: Counting objects:  15% (20/129)        
+remote: Counting objects:  16% (21/129)        
+remote: Counting objects:  17% (22/129)        
+remote: Counting objects:  18% (24/129)        
+remote: Counting objects:  19% (25/129)        
+remote: Counting objects:  20% (26/129)        
+remote: Counting objects:  21% (28/129)        
+remote: Counting objects:  22% (29/129)        
+remote: Counting objects:  23% (30/129)        
+remote: Counting objects:  24% (31/129)        
+remote: Counting objects:  25% (33/129)        
+remote: Counting objects:  26% (34/129)        
+remote: Counting objects:  27% (35/129)        
+remote: Counting objects:  28% (37/129)        
+remote: Counting objects:  29% (38/129)        
+remote: Counting objects:  30% (39/129)        
+remote: Counting objects:  31% (40/129)        
+remote: Counting objects:  32% (42/129)        
+remote: Counting objects:  33% (43/129)        
+remote: Counting objects:  34% (44/129)        
+remote: Counting objects:  35% (46/129)        
+remote: Counting objects:  36% (47/129)        
+remote: Counting objects:  37% (48/129)        
+remote: Counting objects:  38% (50/129)        
+remote: Counting objects:  39% (51/129)        
+remote: Counting objects:  40% (52/129)        
+remote: Counting objects:  41% (53/129)        
+remote: Counting objects:  42% (55/129)        
+remote: Counting objects:  43% (56/129)        
+remote: Counting objects:  44% (57/129)        
+remote: Counting objects:  45% (59/129)        
+remote: Counting objects:  46% (60/129)        
+remote: Counting objects:  47% (61/129)        
+remote: Counting objects:  48% (62/129)        
+remote: Counting objects:  49% (64/129)        
+remote: Counting objects:  50% (65/129)        
+remote: Counting objects:  51% (66/129)        
+remote: Counting objects:  52% (68/129)        
+remote: Counting objects:  53% (69/129)        
+remote: Counting objects:  54% (70/129)        
+remote: Counting objects:  55% (71/129)        
+remote: Counting objects:  56% (73/129)        
+remote: Counting objects:  57% (74/129)        
+remote: Counting objects:  58% (75/129)        
+remote: Counting objects:  59% (77/129)        
+remote: Counting objects:  60% (78/129)        
+remote: Counting objects:  61% (79/129)        
+remote: Counting objects:  62% (80/129)        
+remote: Counting objects:  63% (82/129)        
+remote: Counting objects:  64% (83/129)        
+remote: Counting objects:  65% (84/129)        
+remote: Counting objects:  66% (86/129)        
+remote: Counting objects:  67% (87/129)        
+remote: Counting objects:  68% (88/129)        
+remote: Counting objects:  69% (90/129)        
+remote: Counting objects:  70% (91/129)        
+remote: Counting objects:  71% (92/129)        
+remote: Counting objects:  72% (93/129)        
+remote: Counting objects:  73% (95/129)        
+remote: Counting objects:  74% (96/129)        
+remote: Counting objects:  75% (97/129)        
+remote: Counting objects:  76% (99/129)        
+remote: Counting objects:  77% (100/129)        
+remote: Counting objects:  78% (101/129)        
+remote: Counting objects:  79% (102/129)        
+remote: Counting objects:  80% (104/129)        
+remote: Counting objects:  81% (105/129)        
+remote: Counting objects:  82% (106/129)        
+remote: Counting objects:  83% (108/129)        
+remote: Counting objects:  84% (109/129)        
+remote: Counting objects:  85% (110/129)        
+remote: Counting objects:  86% (111/129)        
+remote: Counting objects:  87% (113/129)        
+remote: Counting objects:  88% (114/129)        
+remote: Counting objects:  89% (115/129)        
+remote: Counting objects:  90% (117/129)        
+remote: Counting objects:  91% (118/129)        
+remote: Counting objects:  92% (119/129)        
+remote: Counting objects:  93% (120/129)        
+remote: Counting objects:  94% (122/129)        
+remote: Counting objects:  95% (123/129)        
+remote: Counting objects:  96% (124/129)        
+remote: Counting objects:  97% (126/129)        
+remote: Counting objects:  98% (127/129)        
+remote: Counting objects:  99% (128/129)        
+remote: Counting objects: 100% (129/129)        
+remote: Counting objects: 100% (129/129), done.
+remote: Compressing objects:   1% (1/99)        
+remote: Compressing objects:   2% (2/99)        
+remote: Compressing objects:   3% (3/99)        
+remote: Compressing objects:   4% (4/99)        
+remote: Compressing objects:   5% (5/99)        
+remote: Compressing objects:   6% (6/99)        
+remote: Compressing objects:   7% (7/99)        
+remote: Compressing objects:   8% (8/99)        
+remote: Compressing objects:   9% (9/99)        
+remote: Compressing objects:  10% (10/99)        
+remote: Compressing objects:  11% (11/99)        
+remote: Compressing objects:  12% (12/99)        
+remote: Compressing objects:  13% (13/99)        
+remote: Compressing objects:  14% (14/99)        
+remote: Compressing objects:  15% (15/99)        
+remote: Compressing objects:  16% (16/99)        
+remote: Compressing objects:  17% (17/99)        
+remote: Compressing objects:  18% (18/99)        
+remote: Compressing objects:  19% (19/99)        
+remote: Compressing objects:  20% (20/99)        
+remote: Compressing objects:  21% (21/99)        
+remote: Compressing objects:  22% (22/99)        
+remote: Compressing objects:  23% (23/99)        
+remote: Compressing objects:  24% (24/99)        
+remote: Compressing objects:  25% (25/99)        
+remote: Compressing objects:  26% (26/99)        
+remote: Compressing objects:  27% (27/99)        
+remote: Compressing objects:  28% (28/99)        
+remote: Compressing objects:  29% (29/99)        
+remote: Compressing objects:  30% (30/99)        
+remote: Compressing objects:  31% (31/99)        
+remote: Compressing objects:  32% (32/99)        
+remote: Compressing objects:  33% (33/99)        
+remote: Compressing objects:  34% (34/99)        
+remote: Compressing objects:  35% (35/99)        
+remote: Compressing objects:  36% (36/99)        
+remote: Compressing objects:  37% (37/99)        
+remote: Compressing objects:  38% (38/99)        
+remote: Compressing objects:  39% (39/99)        
+remote: Compressing objects:  40% (40/99)        
+remote: Compressing objects:  41% (41/99)        
+remote: Compressing objects:  42% (42/99)        
+remote: Compressing objects:  43% (43/99)        
+remote: Compressing objects:  44% (44/99)        
+remote: Compressing objects:  45% (45/99)        
+remote: Compressing objects:  46% (46/99)        
+remote: Compressing objects:  47% (47/99)        
+remote: Compressing objects:  48% (48/99)        
+remote: Compressing objects:  49% (49/99)        
+remote: Compressing objects:  50% (50/99)        
+remote: Compressing objects:  51% (51/99)        
+remote: Compressing objects:  52% (52/99)        
+remote: Compressing objects:  53% (53/99)        
+remote: Compressing objects:  54% (54/99)        
+remote: Compressing objects:  55% (55/99)        
+remote: Compressing objects:  56% (56/99)        
+remote: Compressing objects:  57% (57/99)        
+remote: Compressing objects:  58% (58/99)        
+remote: Compressing objects:  59% (59/99)        
+remote: Compressing objects:  60% (60/99)        
+remote: Compressing objects:  61% (61/99)        
+remote: Compressing objects:  62% (62/99)        
+remote: Compressing objects:  63% (63/99)        
+remote: Compressing objects:  64% (64/99)        
+remote: Compressing objects:  65% (65/99)        
+remote: Compressing objects:  66% (66/99)        
+remote: Compressing objects:  67% (67/99)        
+remote: Compressing objects:  68% (68/99)        
+remote: Compressing objects:  69% (69/99)        
+remote: Compressing objects:  70% (70/99)        
+remote: Compressing objects:  71% (71/99)        
+remote: Compressing objects:  72% (72/99)        
+remote: Compressing objects:  73% (73/99)        
+remote: Compressing objects:  74% (74/99)        
+remote: Compressing objects:  75% (75/99)        
+remote: Compressing objects:  76% (76/99)        
+remote: Compressing objects:  77% (77/99)        
+remote: Compressing objects:  78% (78/99)        
+remote: Compressing objects:  79% (79/99)        
+remote: Compressing objects:  80% (80/99)        
+remote: Compressing objects:  81% (81/99)        
+remote: Compressing objects:  82% (82/99)        
+remote: Compressing objects:  83% (83/99)        
+remote: Compressing objects:  84% (84/99)        
+remote: Compressing objects:  85% (85/99)        
+remote: Compressing objects:  86% (86/99)        
+remote: Compressing objects:  87% (87/99)        
+remote: Compressing objects:  88% (88/99)        
+remote: Compressing objects:  89% (89/99)        
+remote: Compressing objects:  90% (90/99)        
+remote: Compressing objects:  91% (91/99)        
+remote: Compressing objects:  92% (92/99)        
+remote: Compressing objects:  93% (93/99)        
+remote: Compressing objects:  94% (94/99)        
+remote: Compressing objects:  95% (95/99)        
+remote: Compressing objects:  96% (96/99)        
+remote: Compressing objects:  97% (97/99)        
+remote: Compressing objects:  98% (98/99)        
+remote: Compressing objects: 100% (99/99)        
+remote: Compressing objects: 100% (99/99), done.
+Receiving objects:   0% (1/129)
+Receiving objects:   1% (2/129)
+Receiving objects:   2% (3/129)
+Receiving objects:   3% (4/129)
+Receiving objects:   4% (6/129)
+Receiving objects:   5% (7/129)
+Receiving objects:   6% (8/129)
+Receiving objects:   7% (10/129)
+Receiving objects:   8% (11/129)
+Receiving objects:   9% (12/129)
+Receiving objects:  10% (13/129)
+Receiving objects:  11% (15/129)
+Receiving objects:  12% (16/129)
+Receiving objects:  13% (17/129)
+Receiving objects:  14% (19/129)
+Receiving objects:  15% (20/129)
+Receiving objects:  16% (21/129)
+Receiving objects:  17% (22/129)
+Receiving objects:  18% (24/129)
+Receiving objects:  19% (25/129)
+Receiving objects:  20% (26/129)
+Receiving objects:  21% (28/129)
+Receiving objects:  22% (29/129)
+Receiving objects:  23% (30/129)
+Receiving objects:  24% (31/129)
+Receiving objects:  25% (33/129)
+Receiving objects:  26% (34/129)
+Receiving objects:  27% (35/129)
+Receiving objects:  28% (37/129)
+Receiving objects:  29% (38/129)
+Receiving objects:  30% (39/129)
+Receiving objects:  31% (40/129)
+Receiving objects:  32% (42/129)
+Receiving objects:  33% (43/129)
+Receiving objects:  34% (44/129)
+Receiving objects:  35% (46/129)
+Receiving objects:  36% (47/129)
+Receiving objects:  37% (48/129)
+Receiving objects:  38% (50/129)
+Receiving objects:  39% (51/129)
+Receiving objects:  40% (52/129)
+Receiving objects:  41% (53/129)
+Receiving objects:  42% (55/129)
+Receiving objects:  43% (56/129)
+Receiving objects:  44% (57/129)
+Receiving objects:  45% (59/129)
+Receiving objects:  46% (60/129)
+Receiving objects:  47% (61/129)
+Receiving objects:  48% (62/129)
+Receiving objects:  49% (64/129)
+Receiving objects:  50% (65/129)
+Receiving objects:  51% (66/129)
+Receiving objects:  52% (68/129)
+Receiving objects:  53% (69/129)
+Receiving objects:  54% (70/129)
+Receiving objects:  55% (71/129)
+Receiving objects:  56% (73/129)
+Receiving objects:  57% (74/129)
+Receiving objects:  58% (75/129)
+Receiving objects:  59% (77/129)
+Receiving objects:  60% (78/129)
+Receiving objects:  61% (79/129)
+Receiving objects:  62% (80/129)
+Receiving objects:  63% (82/129)
+Receiving objects:  64% (83/129)
+Receiving objects:  65% (84/129)
+Receiving objects:  66% (86/129)
+Receiving objects:  67% (87/129)
+Receiving objects:  68% (88/129)
+Receiving objects:  69% (90/129)
+Receiving objects:  70% (91/129)
+Receiving objects:  71% (92/129)
+Receiving objects:  72% (93/129)
+Receiving objects:  73% (95/129)
+Receiving objects:  74% (96/129)
+Receiving objects:  75% (97/129)
+Receiving objects:  76% (99/129)
+Receiving objects:  77% (100/129)
+Receiving objects:  78% (101/129)
+Receiving objects:  79% (102/129)
+Receiving objects:  80% (104/129)
+Receiving objects:  81% (105/129)
+Receiving objects:  82% (106/129)
+remote: Total 129 (delta 7), reused 117 (delta 6), pack-reused 0 (from 0)
+Receiving objects:  83% (108/129)
+Receiving objects:  84% (109/129)
+Receiving objects:  85% (110/129)
+Receiving objects:  86% (111/129)
+Receiving objects:  87% (113/129)
+Receiving objects:  88% (114/129)
+Receiving objects:  89% (115/129)
+Receiving objects:  90% (117/129)
+Receiving objects:  91% (118/129)
+Receiving objects:  92% (119/129)
+Receiving objects:  93% (120/129)
+Receiving objects:  94% (122/129)
+Receiving objects:  95% (123/129)
+Receiving objects:  96% (124/129)
+Receiving objects:  97% (126/129)
+Receiving objects:  98% (127/129)
+Receiving objects:  99% (128/129)
+Receiving objects: 100% (129/129)
+Receiving objects: 100% (129/129), 304.35 KiB | 9.22 MiB/s, done.
+Resolving deltas:   0% (0/7)
+Resolving deltas:  14% (1/7)
+Resolving deltas:  42% (3/7)
+Resolving deltas:  57% (4/7)
+Resolving deltas:  71% (5/7)
+Resolving deltas:  85% (6/7)
+Resolving deltas: 100% (7/7)
+Resolving deltas: 100% (7/7), done.
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║ App Name: koreskill-app-kssgux                                               ║
+║ Build Compose 🐳                                                             ║
+║ Detected: 0 mounts 📂                                                        ║
+║ Command: docker compose -p koreskill-app-kssgux -f                           ║
+║ ./kore-creative-os/docker-compose.dokploy.yml up -d --build --remove-orphans ║
+║ Source Type: docker github ✅                                                ║
+║ Compose Type: docker-compose ✅                                              ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+Image koreskill-app-kssgux-kore-creative-os Building
+#1 [internal] load local bake definitions
+#1 reading from stdin 644B done
+#1 DONE 0.0s
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 427B done
+#2 DONE 0.0s
+#3 [internal] load metadata for docker.io/library/node:22-bookworm-slim
+#3 DONE 0.5s
+#4 [internal] load .dockerignore
+#4 transferring context: 99B done
+#4 DONE 0.0s
+#5 [1/7] FROM docker.io/library/node:22-bookworm-slim@sha256:f32b81066cde10a75dbac96646099533316d94bac4150c55da1636e1f0ffdc46
+#5 resolve docker.io/library/node:22-bookworm-slim@sha256:f32b81066cde10a75dbac96646099533316d94bac4150c55da1636e1f0ffdc46 0.0s done
+#5 DONE 0.0s
+#6 [internal] load build context
+#6 transferring context: 819.04kB 0.0s done
+#6 DONE 0.0s
+#7 [2/7] WORKDIR /app
+#7 CACHED
+#8 [3/7] RUN apt-get update   && apt-get install -y --no-install-recommends     bash     ca-certificates     curl     coreutils     util-linux   && update-ca-certificates   && rm -rf /var/lib/apt/lists/*
+#8 CACHED
+#9 [4/7] COPY package.json package-lock.json ./
+#9 DONE 0.0s
+#10 [5/7] COPY scripts ./scripts
+#10 DONE 0.0s
+#11 [6/7] RUN npm ci
+#11 12.69 npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+#11 12.83 npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+#11 49.78
+#11 49.78 added 550 packages, and audited 551 packages in 49s
+#11 49.78
+#11 49.78 169 packages are looking for funding
+#11 49.78   run `npm fund` for details
+#11 50.01
+#11 50.01 18 vulnerabilities (1 low, 4 moderate, 13 high)
+#11 50.01
+#11 50.01 To address issues that do not require attention, run:
+#11 50.01   npm audit fix
+#11 50.01
+#11 50.01 To address all issues (including breaking changes), run:
+#11 50.01   npm audit fix --force
+#11 50.01
+#11 50.01 Run `npm audit` for details.
+#11 50.01 npm notice
+#11 50.01 npm notice New major version of npm available! 10.9.8 -> 12.0.2
+#11 50.01 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
+#11 50.01 npm notice To update run: npm install -g npm@12.0.2
+#11 50.01 npm notice
+#11 DONE 51.0s
+#12 [7/7] COPY . .
+#12 DONE 0.5s
+#13 exporting to image
+#13 exporting layers
+#13 exporting layers 51.5s done
+#13 exporting manifest sha256:96b4f9f8b4d24da50bd6b02a90e82a95b66e578cfec49d89ea9b46566eaad61d 0.0s done
+#13 exporting config sha256:e3750e45684ab41d0a8736ca0640e5768b824808707e47d04aa6ed99fdd62700 0.0s done
+#13 exporting attestation manifest sha256:27fce3f2b01b88d76b5aaaec3bc26624e6b282a2bc624a7589fd3618c06b5317 0.0s done
+#13 exporting manifest list sha256:7c06a3ab459dc56c4c825e4405e110310f5d025943c9401d40af3b848b05f4fc
+#13 exporting manifest list sha256:7c06a3ab459dc56c4c825e4405e110310f5d025943c9401d40af3b848b05f4fc 0.0s done
+#13 naming to docker.io/library/koreskill-app-kssgux-kore-creative-os:latest done
+#13 unpacking to docker.io/library/koreskill-app-kssgux-kore-creative-os:latest
+#13 unpacking to docker.io/library/koreskill-app-kssgux-kore-creative-os:latest 29.1s done
+#13 DONE 80.8s
+#14 resolving provenance for metadata file
+#14 DONE 0.0s
+Image koreskill-app-kssgux-kore-creative-os Built
+Container koreskill-app-kssgux-kore-creative-os-1 Recreate
+Container koreskill-app-kssgux-kore-creative-os-1 Recreated
+Container koreskill-app-kssgux-kore-creative-os-1 Starting
+Container koreskill-app-kssgux-kore-creative-os-1 Started
+Docker Compose Deployed: ✅

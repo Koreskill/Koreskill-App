@@ -15,7 +15,14 @@ const localBindingConfig = {
   main: "./worker/index.ts",
   compatibility_flags: ["nodejs_compat"],
   vars: {
-    REPLICATE_API_TOKEN: process.env.REPLICATE_API_TOKEN || "",
+    REPLICATE_API_TOKEN:
+      process.env.REPLICATE_API_TOKEN || "",
+
+    NEXT_PUBLIC_SUPABASE_URL:
+      process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "",
   },
   d1_databases: d1
     ? [

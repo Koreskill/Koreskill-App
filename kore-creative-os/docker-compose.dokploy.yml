@@ -3,26 +3,43 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+
     restart: unless-stopped
+
     expose:
       - "3000"
+
     environment:
       REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN}
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+
     volumes:
       - creative_data:/app/.wrangler
+
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:3000/login"
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 90s
+
     networks:
       - default
       - dokploy-network
+
     labels:
       - traefik.docker.network=dokploy-network
+
 networks:
   dokploy-network:
     external: true
+
 volumes:
   creative_data:
