@@ -199,6 +199,25 @@ async function pollPrediction(id: string): Promise<string> {
   throw new Error("La generación está tardando más de lo esperado.");
 }
 
+async function waitForResultImage(url: string) {
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const loaded = await new Promise<boolean>((resolve) => {
+      const image = new Image();
+
+      image.onload = () => resolve(true);
+      image.onerror = () => resolve(false);
+
+      image.src = url;
+    });
+
+    if (loaded) {
+      return;
+    }
+
+    await wait(900);
+  }
+}
+
 function composePrompt(
   generalPrompt: string,
   item: ProductItem,
@@ -565,14 +584,18 @@ export function RecreatorStudio() {
           id: string;
         };
 
-      const resultUrl = await pollPrediction(
-        payload.id,
-      );
+        const resultUrl = await pollPrediction(payload.id);
 
-      updateProduct(item.id, {
+        /*
+        * Replicate puede devolver la URL antes de que el archivo
+        * esté completamente disponible en su CDN.
+        */
+        await waitForResultImage(resultUrl);
+
+        updateProduct(item.id, {
         status: "succeeded",
         resultUrl,
-      });
+        });
     } catch (error) {
       updateProduct(item.id, {
         status: "failed",
@@ -1101,28 +1124,38 @@ export function RecreatorStudio() {
                 <div
                   className={styles.resultFrame}
                 >
-                  {item.resultUrl ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setLightboxUrl(
-                          item.resultUrl,
-                        )
-                      }
-                      aria-label={`Ampliar resultado de ${item.name}`}
+                    {item.resultUrl ? (
+                    <div
+                        className={styles.resultPreview}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setLightboxUrl(item.resultUrl)}
+                        onKeyDown={(event) => {
+                        if (
+                            event.key === "Enter" ||
+                            event.key === " "
+                        ) {
+                            event.preventDefault();
+                            setLightboxUrl(item.resultUrl);
+                        }
+                        }}
+                        aria-label={`Ampliar resultado de ${item.name}`}
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                        key={item.resultUrl}
                         src={item.resultUrl}
                         alt={`Resultado de ${item.name}`}
-                      />
+                        loading="eager"
+                        decoding="async"
+                        />
 
-                      <span>
+                        <span>
                         <Maximize2 size={13} />
                         Ampliar
-                      </span>
-                    </button>
-                  ) : (
+                        </span>
+                    </div>
+                    ) : (
                     <div>
                       {item.status ===
                       "running" ? (
