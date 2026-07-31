@@ -159,3 +159,22 @@
     padding: 24px 20px;
   }
 }
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 22px;
+  color: #71767f;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.backLink:hover {
+  color: #176bff;
+  transform: translateX(-2px);
+}

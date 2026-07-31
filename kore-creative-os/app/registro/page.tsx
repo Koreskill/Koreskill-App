@@ -58,7 +58,7 @@ export default function RegisterPage() {
 
         <p>
           Después verificaremos tu correo con un código
-          de seis dígitos.
+          de ocho dígitos.
         </p>
 
         <form onSubmit={handleSubmit} className={styles.form}>

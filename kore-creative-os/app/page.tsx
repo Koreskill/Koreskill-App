@@ -5,6 +5,7 @@ import {
   Layers3,
   Megaphone,
   Sparkles,
+  RefreshCcw,
 } from "lucide-react";
 
 export default function Home() {
@@ -72,23 +73,42 @@ export default function Home() {
           </footer>
         </Link>
 
-        <article className="app-card app-card-coming">
+        <Link
+          href="/recreador"
+          className="app-card app-card-cyan"
+        >
           <span className="app-card-icon">
-            <Layers3 size={25} />
+            <RefreshCcw size={25} />
           </span>
-          <span className="app-status">Próximamente</span>
+
+          <span className="app-status">
+            Nueva
+          </span>
+
           <div>
-            <span className="app-number">03</span>
-            <h2>Nuevo flujo</h2>
+            <span className="app-number">
+              03
+            </span>
+
+            <h2>
+              Recreador de imágenes
+            </h2>
+
             <p>
-              El sistema queda preparado para incorporar nuevas aplicaciones
-              sin mezclar sus pantallas ni sus procesos.
+              Aplicá un prompt y una referencia visual a varios
+              productos, agregando características particulares
+              para cada resultado.
             </p>
           </div>
+
           <footer>
-            <span>Espacio disponible</span>
+            <span>
+              Recrear una tanda
+            </span>
+
+            <ArrowRight size={17} />
           </footer>
-        </article>
+        </Link>
       </section>
     </main>
   );

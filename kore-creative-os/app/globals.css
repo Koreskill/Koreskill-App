@@ -2821,3 +2821,21 @@ a.app-card:hover {
     justify-content: space-between;
   }
 }
+
+.app-card-cyan::before {
+  background: rgba(8, 127, 140, 0.1);
+}
+
+.app-card-cyan .app-card-icon {
+  background: #eaf8f9;
+  color: #087f8c;
+}
+
+.app-card-cyan .app-status {
+  background: #eaf8f9;
+  color: #087f8c;
+}
+
+.app-card-cyan footer {
+  color: #087f8c;
+}
