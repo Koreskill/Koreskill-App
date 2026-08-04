@@ -94,6 +94,172 @@ function wait(milliseconds: number) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
+const CREATE_REQUEST_INTERVAL_MS = 11_000;
+const MAX_RATE_LIMIT_RETRIES = 5;
+
+let predictionCreateQueue: Promise<void> = Promise.resolve();
+let nextPredictionRequestAt = 0;
+
+type ReplicateResponse = {
+  id?: string;
+  error?: string;
+  detail?: string;
+  retry_after?: number;
+  [key: string]: unknown;
+};
+
+async function readResponse(response: Response): Promise<ReplicateResponse> {
+  const text = await response.text();
+
+  if (!text) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(text) as ReplicateResponse;
+  } catch {
+    return {
+      error: text,
+    };
+  }
+}
+
+function getRetryDelay(
+  response: Response,
+  payload: ReplicateResponse,
+): number {
+  const retryHeader = Number(response.headers.get("retry-after"));
+
+  if (Number.isFinite(retryHeader) && retryHeader > 0) {
+    return retryHeader * 1000 + 1_500;
+  }
+
+  if (
+    typeof payload.retry_after === "number" &&
+    payload.retry_after > 0
+  ) {
+    return payload.retry_after * 1000 + 1_500;
+  }
+
+  const errorText = JSON.stringify(payload);
+
+  const retryAfterMatch = errorText.match(
+    /["']?retry_after["']?\s*[:=]\s*(\d+(?:\.\d+)?)/i,
+  );
+
+  if (retryAfterMatch) {
+    return Number(retryAfterMatch[1]) * 1000 + 1_500;
+  }
+
+  const resetMatch = errorText.match(
+    /resets?\s+in\s+~?(\d+(?:\.\d+)?)s/i,
+  );
+
+  if (resetMatch) {
+    return Number(resetMatch[1]) * 1000 + 1_500;
+  }
+
+  return CREATE_REQUEST_INTERVAL_MS;
+}
+
+async function createPredictionWithRetry(
+  formData: FormData,
+): Promise<ReplicateResponse> {
+  for (
+    let attempt = 0;
+    attempt <= MAX_RATE_LIMIT_RETRIES;
+    attempt += 1
+  ) {
+    const remainingDelay = Math.max(
+      0,
+      nextPredictionRequestAt - Date.now(),
+    );
+
+    if (remainingDelay > 0) {
+      await wait(remainingDelay);
+    }
+
+    // Replicate permite aproximadamente una creación cada 10 segundos.
+    // Dejamos 11 segundos para evitar alcanzar el límite.
+    nextPredictionRequestAt =
+      Date.now() + CREATE_REQUEST_INTERVAL_MS;
+
+    const response = await fetch(
+      "/api/creative/predictions",
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
+
+    const payload = await readResponse(response);
+
+    // La solicitud fue aceptada correctamente.
+    if (response.ok) {
+      return payload;
+    }
+
+    // Si Replicate limita la solicitud, espera y vuelve a intentar.
+    if (
+      response.status === 429 &&
+      attempt < MAX_RATE_LIMIT_RETRIES
+    ) {
+      const retryDelay = Math.max(
+        CREATE_REQUEST_INTERVAL_MS,
+        getRetryDelay(response, payload),
+      );
+
+      nextPredictionRequestAt =
+        Date.now() + retryDelay;
+
+      await wait(retryDelay);
+      continue;
+    }
+
+    throw new Error(
+      payload.error ||
+        payload.detail ||
+        `La solicitud falló con estado ${response.status}.`,
+    );
+  }
+
+  throw new Error(
+    "Replicate continúa limitando las solicitudes. Intentá nuevamente en un minuto.",
+  );
+}
+
+function enqueuePredictionCreation(
+  formData: FormData,
+): Promise<ReplicateResponse> {
+  const queuedRequest = predictionCreateQueue.then(() =>
+    createPredictionWithRetry(formData),
+  );
+
+  // Permite que la cola continúe aunque una generación falle.
+  predictionCreateQueue = queuedRequest.then(
+    () => undefined,
+    () => undefined,
+  );
+
+  return queuedRequest;
+}
+
+function enqueuePredictionCreation(
+  formData: FormData,
+): Promise<ReplicateResponse> {
+  const queuedRequest = predictionCreateQueue.then(() =>
+    createPredictionWithRetry(formData),
+  );
+
+  // La cola debe continuar aunque una solicitud falle.
+  predictionCreateQueue = queuedRequest.then(
+    () => undefined,
+    () => undefined,
+  );
+
+  return queuedRequest;
+}
+
 function cleanName(value: string) {
   return (
     value
@@ -562,22 +728,18 @@ export function RecreatorStudio() {
       body.append("quality", quality);
       body.append("aspectRatio", aspectRatio);
 
-      const response = await fetch(
-        "/api/creative/predictions",
-        {
-          method: "POST",
-          body,
-        },
-      );
+    const payload =
+    await enqueuePredictionCreation(formData);
 
-      if (!response.ok) {
-        throw new Error(
-          await readError(
-            response,
-            "No se pudo iniciar la generación.",
-          ),
-        );
-      }
+    if (!payload.id) {
+    throw new Error(
+        payload.error ||
+        payload.detail ||
+        "Replicate no devolvió el identificador de la generación.",
+    );
+    }
+
+    const resultUrl = await pollPrediction(payload.id);
 
       const payload =
         (await response.json()) as {
@@ -1102,17 +1264,37 @@ export function RecreatorStudio() {
                 <label className={styles.field}>
                   Características del producto
 
-                  <textarea
+                    <textarea
+                    className={styles.characteristicsTextarea}
                     value={item.characteristics}
-                    onChange={(event) =>
-                      updateProduct(item.id, {
-                        characteristics:
-                          event.target.value,
-                      })
-                    }
-                    rows={4}
-                    placeholder="Beneficios, contexto, elementos que deben aparecer, tono…"
-                  />
+                    placeholder="Características, beneficios, materiales, colores, textos que deben conservarse..."
+                    title="Hacé clic para expandir"
+                    onFocus={(event) => {
+                        const textarea = event.currentTarget;
+
+                        textarea.style.height = "auto";
+                        textarea.style.height = `${textarea.scrollHeight}px`;
+                    }}
+                    onClick={(event) => {
+                        const textarea = event.currentTarget;
+
+                        textarea.style.height = "auto";
+                        textarea.style.height = `${textarea.scrollHeight}px`;
+                    }}
+                    onBlur={(event) => {
+                        event.currentTarget.style.height = "";
+                    }}
+                    onChange={(event) => {
+                        updateProduct(item.id, {
+                        characteristics: event.target.value,
+                        });
+
+                        const textarea = event.currentTarget;
+
+                        textarea.style.height = "auto";
+                        textarea.style.height = `${textarea.scrollHeight}px`;
+                    }}
+                    />
                 </label>
 
                 {item.error && (

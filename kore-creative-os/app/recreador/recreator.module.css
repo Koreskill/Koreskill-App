@@ -470,24 +470,29 @@
     #202428;
 }
 
-.resultFrame > button {
+.resultPreview {
   position: relative;
   width: 100%;
   height: 100%;
+  display: block;
+  overflow: hidden;
   padding: 0;
-  border: 0;
-  background: transparent;
+  background: #eceff1;
   cursor: zoom-in;
 }
 
-.resultFrame img {
+.resultPreview img {
   width: 100%;
   height: 100%;
   display: block;
   object-fit: contain;
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
 }
 
-.resultFrame > button span {
+.resultPreview span {
   position: absolute;
   right: 8px;
   bottom: 8px;
@@ -667,4 +672,39 @@
   .resultFrame {
     height: 390px;
   }
+}
+
+.characteristicsTextarea {
+  width: 100%;
+  height: 58px;
+  min-height: 58px;
+  max-height: 58px;
+  padding: 12px 14px;
+  border: 1px solid #dfe3e8;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #17191c;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.5;
+  resize: none;
+  overflow: hidden;
+  outline: none;
+  cursor: text;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    min-height 200ms ease;
+}
+
+.characteristicsTextarea:hover {
+  border-color: #b9c3cf;
+}
+
+.characteristicsTextarea:focus {
+  min-height: 130px;
+  max-height: none;
+  overflow-y: hidden;
+  border-color: #2472ff;
+  box-shadow: 0 0 0 3px rgba(36, 114, 255, 0.12);
 }
