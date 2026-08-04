@@ -150,10 +150,10 @@ function normalizedValues(payload: PropertyPayload) {
   };
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     await ensureDbSchema();
-    const owner = ownerFromRequest(request);
+    const owner = await ownerFromRequest();
     const rows = await getDb()
       .select()
       .from(properties)
@@ -173,7 +173,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     await ensureDbSchema();
-    const owner = ownerFromRequest(request);
+    const owner = await ownerFromRequest();
     const payload = (await request.json()) as PropertyPayload;
     const values = normalizedValues(payload);
 
@@ -222,7 +222,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     await ensureDbSchema();
-    const owner = ownerFromRequest(request);
+    const owner = await ownerFromRequest();
     const payload = (await request.json()) as PropertyPayload;
     const id = cleanText(payload.id, 80);
 

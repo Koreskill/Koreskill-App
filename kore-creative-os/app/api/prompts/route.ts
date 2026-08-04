@@ -104,10 +104,10 @@ async function ensureDefaultPresets(owner: string) {
   }
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     await ensureDbSchema();
-    const owner = ownerFromRequest(request);
+    const owner = await ownerFromRequest();
     await ensureDefaultPresets(owner);
     const rows = await getDb()
       .select({
@@ -138,7 +138,7 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
   try {
     await ensureDbSchema();
-    const owner = ownerFromRequest(request);
+    const owner = await ownerFromRequest();
     const payload = (await request.json()) as {
       key?: string;
       prompt?: string;
@@ -172,7 +172,7 @@ export async function PUT(request: Request) {
 export async function POST(request: Request) {
   try {
     await ensureDbSchema();
-    const owner = ownerFromRequest(request);
+    const owner = await ownerFromRequest();
     const payload = (await request.json()) as {
       label?: string;
       prompt?: string;

@@ -19,7 +19,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024;
 export async function GET(request: Request) {
   try {
     await ensureDbSchema();
-    const owner = ownerFromRequest(request);
+    const owner = await ownerFromRequest();
     const propertyId = new URL(request.url).searchParams.get("propertyId");
     const db = getDb();
     const rows = await db
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "Calidad inválida." }, { status: 400 });
     }
 
-    const owner = ownerFromRequest(request);
+    const owner = await ownerFromRequest();
     const db = getDb();
     const [property] = await db
       .select({ id: properties.id })

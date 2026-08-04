@@ -2857,3 +2857,21 @@ a.app-card:hover {
 .app-card-amber footer {
   color: #a86508;
 }
+
+.app-card-green::before {
+  background: rgba(22, 163, 74, 0.1);
+}
+
+.app-card-green .app-card-icon {
+  background: #eaf8ef;
+  color: #168447;
+}
+
+.app-card-green .app-status {
+  background: #eaf8ef;
+  color: #168447;
+}
+
+.app-card-green footer {
+  color: #168447;
+}

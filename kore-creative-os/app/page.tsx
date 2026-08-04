@@ -2,10 +2,11 @@ import Link from "next/link";
 import {
   ArrowRight,
   Building2,
-  Megaphone,
-  Sparkles,
-  RefreshCcw,
   FilePenLine,
+  LibraryBig,
+  Megaphone,
+  RefreshCcw,
+  Sparkles,
 } from "lucide-react";
 
 export default function Home() {
@@ -125,6 +126,37 @@ export default function Home() {
           </div>
           <footer>
             <span>Redactar una propiedad</span>
+            <ArrowRight size={17} />
+          </footer>
+        </Link>
+                <Link
+          href="/biblioteca"
+          className="app-card app-card-green"
+        >
+          <span className="app-card-icon">
+            <LibraryBig size={25} />
+          </span>
+
+          <span className="app-status">
+            Operativa
+          </span>
+
+          <div>
+            <span className="app-number">
+              05
+            </span>
+
+            <h2>Biblioteca de proyectos</h2>
+
+            <p>
+              Consultá las imágenes, textos, costos e
+              información de cada propiedad desde una
+              carpeta unificada.
+            </p>
+          </div>
+
+          <footer>
+            <span>Abrir la biblioteca</span>
             <ArrowRight size={17} />
           </footer>
         </Link>

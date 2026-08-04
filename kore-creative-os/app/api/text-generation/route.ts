@@ -156,7 +156,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const owner = ownerFromRequest(request);
+    const owner = await ownerFromRequest();
     const payload =
       (await request.json()) as TextGenerationPayload;
 

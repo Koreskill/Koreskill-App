@@ -83,7 +83,7 @@ export async function GET(request: Request) {
   try {
     await ensureDbSchema();
 
-    const owner = ownerFromRequest(request);
+    const owner = await ownerFromRequest();
     const url = new URL(request.url);
     const propertyId = cleanString(
       url.searchParams.get("propertyId"),
@@ -128,7 +128,7 @@ export async function POST(request: Request) {
   try {
     await ensureDbSchema();
 
-    const owner = ownerFromRequest(request);
+    const owner = await ownerFromRequest();
     const payload =
       (await request.json()) as GeneratedTextPayload;
 
@@ -261,7 +261,7 @@ export async function PUT(request: Request) {
   try {
     await ensureDbSchema();
 
-    const owner = ownerFromRequest(request);
+    const owner = await ownerFromRequest();
     const payload =
       (await request.json()) as GeneratedTextPayload;
 
@@ -416,7 +416,7 @@ export async function DELETE(request: Request) {
   try {
     await ensureDbSchema();
 
-    const owner = ownerFromRequest(request);
+    const owner = await ownerFromRequest();
     const url = new URL(request.url);
     const id = cleanString(url.searchParams.get("id"), 100);
 

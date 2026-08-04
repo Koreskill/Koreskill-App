@@ -9,7 +9,7 @@ export async function GET(
   context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
-  const owner = ownerFromRequest(request);
+  const owner = await ownerFromRequest();
   await ensureDbSchema();
   const [job] = await getDb()
     .select()

@@ -11,7 +11,7 @@ export async function POST(
   context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
-  const owner = ownerFromRequest(request);
+  const owner = await ownerFromRequest();
   await ensureDbSchema();
   const db = getDb();
 

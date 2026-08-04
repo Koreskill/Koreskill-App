@@ -1,13 +1,25 @@
 import type { InferSelectModel } from "drizzle-orm";
 import { imageJobs } from "@/db/schema";
 
+import { createClient } from "@/lib/supabase/server";
+
 export type ImageJobRow = InferSelectModel<typeof imageJobs>;
 
-export function ownerFromRequest(request: Request): string {
-  return (
-    request.headers.get("oai-authenticated-user-email")?.toLowerCase() ||
-    "local-preview-owner"
-  );
+export async function ownerFromRequest(): Promise<string> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    throw new Error(
+      "No se pudo identificar al usuario autenticado.",
+    );
+  }
+
+  return user.id;
 }
 
 export async function ownerNamespace(owner: string): Promise<string> {

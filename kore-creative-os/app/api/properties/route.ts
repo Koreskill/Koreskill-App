@@ -80,10 +80,10 @@ async function organizeLegacyJobs(owner: string) {
   }
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     await ensureDbSchema();
-    const owner = ownerFromRequest(request);
+    const owner = await ownerFromRequest();
     await organizeLegacyJobs(owner);
     const db = getDb();
 
@@ -139,7 +139,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     await ensureDbSchema();
-    const owner = ownerFromRequest(request);
+    const owner = await ownerFromRequest();
     const payload = (await request.json()) as {
       name?: string;
       address?: string;

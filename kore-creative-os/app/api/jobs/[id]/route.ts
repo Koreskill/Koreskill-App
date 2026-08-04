@@ -143,7 +143,7 @@ export async function GET(
   context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
-  const owner = ownerFromRequest(request);
+  const owner = await ownerFromRequest();
 
   try {
     let job = await findJob(id, owner);
@@ -183,7 +183,7 @@ export async function PATCH(
   context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
-  const owner = ownerFromRequest(request);
+  const owner = await ownerFromRequest();
 
   try {
     const payload = (await request.json()) as {
@@ -233,7 +233,7 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
-  const owner = ownerFromRequest(request);
+  const owner = await ownerFromRequest();
   const job = await findJob(id, owner);
   if (!job) return new Response(null, { status: 204 });
 
