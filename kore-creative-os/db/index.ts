@@ -97,6 +97,22 @@ export async function ensureDbSchema() {
             created_at text DEFAULT CURRENT_TIMESTAMP NOT NULL,
             completed_at text
           )`,
+        ),        db.prepare(
+          `CREATE TABLE IF NOT EXISTS generated_texts (
+            id text PRIMARY KEY NOT NULL,
+            owner text NOT NULL,
+            property_id text NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+            type text NOT NULL,
+            content text NOT NULL,
+            source_text text,
+            prompt_version text DEFAULT 'v1' NOT NULL,
+            model text NOT NULL,
+            input_tokens integer DEFAULT 0 NOT NULL,
+            output_tokens integer DEFAULT 0 NOT NULL,
+            estimated_cost_micros integer DEFAULT 0 NOT NULL,
+            created_at text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            updated_at text DEFAULT CURRENT_TIMESTAMP NOT NULL
+          )`,
         ),
       ]);
 
@@ -184,6 +200,12 @@ export async function ensureDbSchema() {
         ),
         db.prepare(
           "CREATE INDEX IF NOT EXISTS generation_runs_job_idx ON generation_runs (job_id)",
+        ),
+        db.prepare(
+          "CREATE INDEX IF NOT EXISTS generated_texts_property_idx ON generated_texts (property_id)",
+        ),
+        db.prepare(
+          "CREATE INDEX IF NOT EXISTS generated_texts_owner_created_idx ON generated_texts (owner, created_at)",
         ),
       ]);
     })().catch((error: unknown) => {

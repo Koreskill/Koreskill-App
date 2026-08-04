@@ -50,6 +50,10 @@ export default function RegisterPage() {
   return (
     <main className={styles.shell}>
       <section className={styles.card}>
+          <Link href="/login" className={styles.backLink}>
+            <span aria-hidden="true">←</span>
+            Volver al inicio de sesión
+          </Link>
         <span className={styles.eyebrow}>
           SOLICITUD DE ACCESO
         </span>

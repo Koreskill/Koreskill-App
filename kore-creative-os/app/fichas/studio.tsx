@@ -41,6 +41,37 @@ type ApiResponse = {
   error?: string;
 };
 
+type GeneratedOutputs = {
+  whatsapp: string;
+  portal: string;
+  instagram: string;
+};
+
+type TextGenerationResponse = {
+  property?: Partial<PropertyDraft>;
+  texts?: GeneratedOutputs;
+  usage?: {
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+  };
+  model?: string;
+  promptVersion?: string;
+  error?: string;
+};
+
+type SavedTextResponse = {
+  texts?: Array<{
+    id: string;
+    type: OutputTab;
+    content: string;
+    model: string;
+    inputTokens: number;
+    outputTokens: number;
+  }>;
+  error?: string;
+};
+
 const OUTPUT_TABS: Array<{
   key: OutputTab;
   label: string;
@@ -70,6 +101,16 @@ export function PropertyWriter() {
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+    const [generating, setGenerating] = useState(false);
+
+  const [generatedOutputs, setGeneratedOutputs] =
+    useState<GeneratedOutputs | null>(null);
+
+  const [generationInfo, setGenerationInfo] = useState<{
+    model: string;
+    inputTokens: number;
+    outputTokens: number;
+  } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -116,7 +157,7 @@ export function PropertyWriter() {
     );
   }, [records, search]);
 
-  const outputs = useMemo(
+  const fallbackOutputs = useMemo(
     () => ({
       whatsapp: renderWhatsApp(draft),
       portal: renderPortal(draft),
@@ -124,6 +165,8 @@ export function PropertyWriter() {
     }),
     [draft],
   );
+
+  const outputs = generatedOutputs || fallbackOutputs;
 
   const update = <Key extends keyof PropertyDraft>(
     key: Key,
@@ -137,17 +180,86 @@ export function PropertyWriter() {
   const newRecord = () => {
     setDraft(emptyPropertyDraft());
     setSourceText("");
+    setGeneratedOutputs(null);
+    setGenerationInfo(null);
     setNotice("");
     setError("");
     setCopied(false);
   };
 
-  const openRecord = (record: PropertyDraft) => {
-    setDraft({ ...record, destacados: [...record.destacados] });
+  const openRecord = async (record: PropertyDraft) => {
+    setDraft({
+      ...record,
+      destacados: [...record.destacados],
+    });
+
     setSourceText(record.textoOriginal);
+    setGeneratedOutputs(null);
+    setGenerationInfo(null);
     setNotice("");
     setError("");
     setCopied(false);
+
+    try {
+      const response = await fetch(
+        `/api/property-texts?propertyId=${encodeURIComponent(record.id)}`,
+        {
+          cache: "no-store",
+        },
+      );
+
+      const payload =
+        (await response.json()) as SavedTextResponse;
+
+      if (!response.ok) {
+        throw new Error(
+          payload.error ||
+            "No se pudieron cargar los textos guardados.",
+        );
+      }
+
+      const savedOutputs: GeneratedOutputs = {
+        whatsapp: renderWhatsApp(record),
+        portal: renderPortal(record),
+        instagram: renderInstagram(record),
+      };
+
+      let foundSavedText = false;
+      const loadedTypes = new Set<OutputTab>();
+
+      for (const savedText of payload.texts || []) {
+        if (
+          loadedTypes.has(savedText.type) ||
+          !["whatsapp", "portal", "instagram"].includes(
+            savedText.type,
+          )
+        ) {
+          continue;
+        }
+
+        savedOutputs[savedText.type] = savedText.content;
+        loadedTypes.add(savedText.type);
+        foundSavedText = true;
+
+        if (!generationInfo) {
+          setGenerationInfo({
+            model: savedText.model,
+            inputTokens: savedText.inputTokens,
+            outputTokens: savedText.outputTokens,
+          });
+        }
+      }
+
+      if (foundSavedText) {
+        setGeneratedOutputs(savedOutputs);
+      }
+    } catch (loadError) {
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "No se pudieron cargar los textos guardados.",
+      );
+    }
   };
 
   const interpretSource = () => {
@@ -159,6 +271,112 @@ export function PropertyWriter() {
     setDraft(interpreted);
     setNotice("Datos detectados. Revisalos antes de guardar.");
     setError("");
+  };
+
+    const generateTextsWithOpenAI = async () => {
+    if (!sourceText.trim()) {
+      setError(
+        "Pegá primero la información original de la propiedad.",
+      );
+      return;
+    }
+
+    if (!draft.id) {
+      setError(
+        "Primero completá los datos y guardá la ficha. Después vas a poder generar los textos con OpenAI.",
+      );
+      return;
+    }
+
+    setGenerating(true);
+    setError("");
+    setNotice("");
+    setCopied(false);
+
+    try {
+      const response = await fetch("/api/text-generation", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          propertyId: draft.id,
+          sourceText,
+          property: {
+            tipo: draft.tipo,
+            operacion: draft.operacion,
+            titulo: draft.titulo,
+            zona: draft.zona,
+            direccion: draft.direccion,
+            cliente: draft.cliente,
+            moneda: draft.moneda,
+            precio: draft.precio,
+            totalM2: draft.totalM2,
+            cubiertaM2: draft.cubiertaM2,
+            dormitorios: draft.dormitorios,
+            banos: draft.banos,
+            cocheras: draft.cocheras,
+            estado: draft.estado,
+            situacion: draft.situacion,
+            destacados: draft.destacados,
+            contacto: draft.contacto,
+          },
+        }),
+      });
+
+      const payload =
+        (await response.json()) as TextGenerationResponse;
+
+      if (!response.ok) {
+        throw new Error(
+          payload.error ||
+            "No se pudieron generar los textos.",
+        );
+      }
+
+      if (!payload.property || !payload.texts) {
+        throw new Error(
+          "OpenAI devolvió una respuesta incompleta.",
+        );
+      }
+
+      setDraft((current) => ({
+        ...current,
+        ...payload.property,
+        id: current.id,
+        slug: current.slug,
+        creada: current.creada,
+        actualizada: current.actualizada,
+        fichaCompleta: current.fichaCompleta,
+        textoOriginal: sourceText,
+        destacados:
+          payload.property?.destacados?.length
+            ? payload.property.destacados
+            : current.destacados,
+      }));
+
+      setGeneratedOutputs(payload.texts);
+
+      if (payload.usage && payload.model) {
+        setGenerationInfo({
+          model: payload.model,
+          inputTokens: payload.usage.inputTokens,
+          outputTokens: payload.usage.outputTokens,
+        });
+      }
+
+      setNotice(
+        "Textos generados y guardados. Revisá los datos detectados y guardá los cambios de la ficha.",
+      );
+    } catch (generationError) {
+      setError(
+        generationError instanceof Error
+          ? generationError.message
+          : "No se pudieron generar los textos.",
+      );
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const saveRecord = async () => {
@@ -280,7 +498,7 @@ export function PropertyWriter() {
                   type="button"
                   key={record.id}
                   className={draft.id === record.id ? styles.recordActive : ""}
-                  onClick={() => openRecord(record)}
+                  onClick={() => void openRecord(record)}
                 >
                   <span className={styles.recordIcon}>
                     <Building2 size={15} />
@@ -563,6 +781,36 @@ export function PropertyWriter() {
                 </div>
                 <span className={styles.liveBadge}>En vivo</span>
               </div>
+
+              <button
+                type="button"
+                className={styles.aiGenerateButton}
+                onClick={() => void generateTextsWithOpenAI()}
+                disabled={generating || !draft.id}
+              >
+                {generating ? (
+                  <LoaderCircle className="spin" size={16} />
+                ) : (
+                  <WandSparkles size={16} />
+                )}
+
+                {generating
+                  ? "Generando con OpenAI..."
+                  : draft.id
+                    ? "Generar textos con OpenAI"
+                    : "Guardá la ficha para usar OpenAI"}
+              </button>
+
+              {generationInfo && (
+                <div className={styles.aiGenerationInfo}>
+                  <span>Generado con {generationInfo.model}</span>
+
+                  <small>
+                    {generationInfo.inputTokens} tokens de entrada ·{" "}
+                    {generationInfo.outputTokens} tokens de salida
+                  </small>
+                </div>
+              )}
 
               <div className={styles.outputTabs}>
                 {OUTPUT_TABS.map((tab) => {

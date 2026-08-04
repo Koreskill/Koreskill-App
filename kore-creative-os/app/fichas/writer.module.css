@@ -680,3 +680,57 @@
     height: 16px;
   }
 }
+
+.aiGenerateButton {
+  width: 100%;
+  min-height: 48px;
+  margin-bottom: 14px;
+  border: 0;
+  border-radius: 12px;
+  background: #111317;
+  color: #ffffff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    opacity 160ms ease,
+    background 160ms ease;
+}
+
+.aiGenerateButton:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.aiGenerateButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.aiGenerationInfo {
+  margin: -3px 0 15px;
+  padding: 10px 12px;
+  border: 1px solid #dbe7ff;
+  border-radius: 10px;
+  background: #f4f8ff;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.aiGenerationInfo span {
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.aiGenerationInfo small {
+  color: #64748b;
+  font-size: 11px;
+}
