@@ -199,9 +199,21 @@ async function createPredictionWithRetry(
       return payload;
     }
 
+    const errorMessage = [payload.error, payload.detail]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    const isRateLimited =
+      response.status === 429 ||
+      errorMessage.includes("429") ||
+      errorMessage.includes("too many requests") ||
+      errorMessage.includes("throttled") ||
+      errorMessage.includes("rate limit");
+
     // Si Replicate limita la solicitud, espera y vuelve a intentar.
     if (
-      response.status === 429 &&
+      isRateLimited &&
       attempt < MAX_RATE_LIMIT_RETRIES
     ) {
       const retryDelay = Math.max(
@@ -236,22 +248,6 @@ function enqueuePredictionCreation(
   );
 
   // Permite que la cola continúe aunque una generación falle.
-  predictionCreateQueue = queuedRequest.then(
-    () => undefined,
-    () => undefined,
-  );
-
-  return queuedRequest;
-}
-
-function enqueuePredictionCreation(
-  formData: FormData,
-): Promise<ReplicateResponse> {
-  const queuedRequest = predictionCreateQueue.then(() =>
-    createPredictionWithRetry(formData),
-  );
-
-  // La cola debe continuar aunque una solicitud falle.
   predictionCreateQueue = queuedRequest.then(
     () => undefined,
     () => undefined,
@@ -728,36 +724,29 @@ export function RecreatorStudio() {
       body.append("quality", quality);
       body.append("aspectRatio", aspectRatio);
 
-    const payload =
-    await enqueuePredictionCreation(formData);
-
-    if (!payload.id) {
-    throw new Error(
-        payload.error ||
-        payload.detail ||
-        "Replicate no devolvió el identificador de la generación.",
-    );
-    }
-
-    const resultUrl = await pollPrediction(payload.id);
-
       const payload =
-        (await response.json()) as {
-          id: string;
-        };
+        await enqueuePredictionCreation(body);
 
-        const resultUrl = await pollPrediction(payload.id);
+      if (!payload.id) {
+        throw new Error(
+          payload.error ||
+            payload.detail ||
+            "Replicate no devolvió el identificador de la generación.",
+        );
+      }
 
-        /*
-        * Replicate puede devolver la URL antes de que el archivo
-        * esté completamente disponible en su CDN.
-        */
-        await waitForResultImage(resultUrl);
+      const resultUrl = await pollPrediction(payload.id);
 
-        updateProduct(item.id, {
+      /*
+       * Replicate puede devolver la URL antes de que el archivo
+       * esté completamente disponible en su CDN.
+       */
+      await waitForResultImage(resultUrl);
+
+      updateProduct(item.id, {
         status: "succeeded",
         resultUrl,
-        });
+      });
     } catch (error) {
       updateProduct(item.id, {
         status: "failed",

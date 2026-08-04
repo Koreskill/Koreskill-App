@@ -1,0 +1,19 @@
+ALTER TABLE `properties` ADD `slug` text;--> statement-breakpoint
+ALTER TABLE `properties` ADD `type` text;--> statement-breakpoint
+ALTER TABLE `properties` ADD `operation` text;--> statement-breakpoint
+ALTER TABLE `properties` ADD `title` text;--> statement-breakpoint
+ALTER TABLE `properties` ADD `zone` text;--> statement-breakpoint
+ALTER TABLE `properties` ADD `client` text;--> statement-breakpoint
+ALTER TABLE `properties` ADD `currency` text;--> statement-breakpoint
+ALTER TABLE `properties` ADD `price_value` integer;--> statement-breakpoint
+ALTER TABLE `properties` ADD `total_m2` real;--> statement-breakpoint
+ALTER TABLE `properties` ADD `covered_m2` real;--> statement-breakpoint
+ALTER TABLE `properties` ADD `bedrooms` integer;--> statement-breakpoint
+ALTER TABLE `properties` ADD `bathrooms` integer;--> statement-breakpoint
+ALTER TABLE `properties` ADD `garages` integer;--> statement-breakpoint
+ALTER TABLE `properties` ADD `property_status` text;--> statement-breakpoint
+ALTER TABLE `properties` ADD `situation` text;--> statement-breakpoint
+ALTER TABLE `properties` ADD `highlights_json` text DEFAULT '[]' NOT NULL;--> statement-breakpoint
+ALTER TABLE `properties` ADD `contact` text;--> statement-breakpoint
+ALTER TABLE `properties` ADD `raw_source` text;--> statement-breakpoint
+CREATE UNIQUE INDEX `properties_owner_slug_idx` ON `properties` (`owner`,`slug`);

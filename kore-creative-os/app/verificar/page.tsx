@@ -1,12 +1,8 @@
 "use client";
 
-import {
-  FormEvent,
-  useEffect,
-  useState,
-} from "react";
+import { FormEvent, useState } from "react";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import styles from "../login/auth.module.css";
 
@@ -14,23 +10,15 @@ const OTP_LENGTH = 8;
 
 export default function VerifyPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(
+    () => searchParams.get("email") || "",
+  );
   const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [hasError, setHasError] = useState(false);
-
-  useEffect(() => {
-    const emailFromUrl =
-      new URLSearchParams(window.location.search).get(
-        "email",
-      );
-
-    if (emailFromUrl) {
-      setEmail(emailFromUrl);
-    }
-  }, []);
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,

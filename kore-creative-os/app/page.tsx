@@ -2,10 +2,10 @@ import Link from "next/link";
 import {
   ArrowRight,
   Building2,
-  Layers3,
   Megaphone,
   Sparkles,
   RefreshCcw,
+  FilePenLine,
 } from "lucide-react";
 
 export default function Home() {
@@ -106,6 +106,25 @@ export default function Home() {
               Recrear una tanda
             </span>
 
+            <ArrowRight size={17} />
+          </footer>
+        </Link>
+
+        <Link href="/fichas" className="app-card app-card-amber">
+          <span className="app-card-icon">
+            <FilePenLine size={25} />
+          </span>
+          <span className="app-status">Nueva</span>
+          <div>
+            <span className="app-number">04</span>
+            <h2>Redactor de fichas</h2>
+            <p>
+              Convertí datos sueltos de una propiedad en fichas consistentes
+              para WhatsApp, portales e Instagram, listas para copiar.
+            </p>
+          </div>
+          <footer>
+            <span>Redactar una propiedad</span>
             <ArrowRight size={17} />
           </footer>
         </Link>
