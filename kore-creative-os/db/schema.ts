@@ -188,3 +188,71 @@ export const generatedTexts = sqliteTable(
     ),
   ],
 );
+
+export const clients = sqliteTable(
+  "clients",
+  {
+    id: text("id").primaryKey(),
+    owner: text("owner").notNull(),
+    name: text("name").notNull(),
+    color: text("color").notNull().default("#2563eb"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    uniqueIndex("clients_owner_name_idx").on(table.owner, table.name),
+    index("clients_owner_created_idx").on(table.owner, table.createdAt),
+  ],
+);
+
+export const calendarItems = sqliteTable(
+  "calendar_items",
+  {
+    id: text("id").primaryKey(),
+    owner: text("owner").notNull(),
+    clientId: text("client_id").references(() => clients.id, {
+      onDelete: "set null",
+    }),
+    propertyId: text("property_id").references(() => properties.id, {
+      onDelete: "set null",
+    }),
+    title: text("title").notNull(),
+    contentType: text("content_type").notNull().default("post"),
+    channel: text("channel").notNull().default("Instagram"),
+    scheduledFor: text("scheduled_for").notNull(),
+    status: text("status").notNull().default("planned"),
+    notes: text("notes"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index("calendar_items_owner_date_idx").on(
+      table.owner,
+      table.scheduledFor,
+    ),
+    index("calendar_items_client_idx").on(table.clientId),
+    index("calendar_items_property_idx").on(table.propertyId),
+  ],
+);
+
+export const cameraPresets = sqliteTable(
+  "camera_presets",
+  {
+    id: text("id").primaryKey(),
+    owner: text("owner").notNull(),
+    name: text("name").notNull(),
+    horizontal: real("horizontal").notNull().default(0),
+    vertical: real("vertical").notNull().default(0),
+    zoom: real("zoom").notNull().default(0),
+    pan: real("pan").notNull().default(0),
+    tilt: real("tilt").notNull().default(0),
+    rotate: real("rotate").notNull().default(0),
+    durationSeconds: real("duration_seconds").notNull().default(5),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    uniqueIndex("camera_presets_owner_name_idx").on(table.owner, table.name),
+    index("camera_presets_owner_created_idx").on(table.owner, table.createdAt),
+  ],
+);

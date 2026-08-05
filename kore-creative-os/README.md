@@ -1,7 +1,8 @@
 # Kore Creative OS
 
-Sistema interno con aplicaciones para producir imágenes mediante
-`openai/gpt-image-2` a través de Replicate.
+Sistema interno para producir imágenes, textos, videos de cámara y calendarios
+de contenido. Las generaciones de IA usan `openai/gpt-image-2` mediante
+Replicate; el motor de cámara 2D funciona localmente en el navegador.
 
 ## Empezar
 
@@ -46,6 +47,35 @@ Sistema interno con aplicaciones para producir imágenes mediante
 - Versiones para portales e Instagram desde los mismos datos.
 - Biblioteca de propiedades con guardado y reedición.
 
+### 5. Biblioteca de proyectos
+
+- Reúne imágenes, textos, información y costos de cada propiedad.
+- Permite crear clientes y usar sus nombres como etiquetas.
+- Filtra carpetas por cliente y cambia la etiqueta desde cada tarjeta.
+- Elimina una carpeta completa, sus imágenes, resultados, textos y costos.
+
+### 6. Cámara inmobiliaria
+
+- Pegar, arrastrar o seleccionar una fotografía.
+- Cinco presets visuales: Push-In, Pull-Out, Slide Left, Crane Up y Orbit Right.
+- Previsualizaciones animadas sobre la foto cargada.
+- Controles avanzados ocultos por defecto, con seis valores de `-10.0` a
+  `10.0` y duración configurable.
+- Guardado de presets propios por usuario.
+- Visor de trayectoria con marcos y punto de interés seleccionable.
+- Exportación local de clips verticales 9:16 sin costo por generación.
+
+> El motor incluido en esta entrega es 2D con perspectiva. La profundidad
+> cacheada y el Orbit 2.5D real quedan preparados como la siguiente evolución;
+> requieren conectar un modelo de profundidad antes de prometer paralaje real.
+
+### 7. Calendario de contenido
+
+- Vista mensual, navegación por meses y filtro por cliente.
+- Alta y edición de publicaciones con fecha, hora, canal, formato y estado.
+- Vinculación opcional entre una publicación, un cliente y una propiedad.
+- Lista de próximas publicaciones y colores por cliente.
+
 ## Inicio rápido en un servidor propio
 
 La forma recomendada es Docker. El servidor debe tener Docker y Docker Compose.
@@ -76,13 +106,20 @@ La forma recomendada es Docker. El servidor debe tener Docker y Docker Compose.
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=tu_clave_publicable
    ```
 
-6. Construir y levantar:
+6. Para habilitar el generador de textos, agregar:
+
+   ```env
+   OPENAI_API_KEY=sk_tu_clave
+   OPENAI_TEXT_MODEL=tu_modelo_de_texto
+   ```
+
+7. Construir y levantar:
 
    ```bash
    docker compose up -d --build
    ```
 
-7. Abrir:
+8. Abrir:
 
    ```text
    http://IP-DE-TU-SERVIDOR:3000
@@ -144,6 +181,18 @@ crear una nueva.
 
 En el sitio alojado, la misma clave debe configurarse como secreto con el
 nombre `REPLICATE_API_TOKEN`.
+
+### Generación de textos con OpenAI
+
+En `.env` y en las variables de Dokploy configurar:
+
+```env
+OPENAI_API_KEY=sk_tu_clave
+OPENAI_TEXT_MODEL=tu_modelo_de_texto
+```
+
+La clave se usa únicamente en el servidor. Nunca debe llevar el prefijo
+`NEXT_PUBLIC_` ni escribirse dentro de un componente.
 
 ### Modelo de imágenes
 
@@ -262,6 +311,41 @@ anterior como entrada de la siguiente.
 
 Esto evita mezclar datos y procesos entre aplicaciones.
 
+### Clientes, etiquetas, eliminación y calendario
+
+Las tablas y sus índices se crean automáticamente al iniciar la aplicación.
+También se incluye la migración de Drizzle correspondiente.
+
+Archivos principales:
+
+```text
+app/biblioteca/library.tsx              # Etiquetas y eliminación de carpetas
+app/calendario/calendar.tsx             # Calendario interno
+app/api/clients/route.ts                # Clientes
+app/api/calendar/                       # Publicaciones programadas
+app/api/library/[propertyId]/route.ts   # Etiquetar y eliminar proyectos
+db/schema.ts                            # Definición de tablas
+db/index.ts                             # Compatibilidad con bases existentes
+```
+
+La eliminación de una carpeta es irreversible. Antes de confirmarla, la
+interfaz muestra una advertencia. Los eventos del calendario no se eliminan:
+quedan conservados y solamente pierden el vínculo con la propiedad eliminada.
+
+### Presets de cámara
+
+Los cinco presets de fábrica se encuentran en:
+
+```text
+app/camara/studio.tsx
+```
+
+Buscar `FACTORY_PRESETS`. Los presets personales se guardan mediante:
+
+```text
+app/api/camera-presets/route.ts
+```
+
 ### Modificar el formato de las fichas inmobiliarias
 
 Los tres renderizadores deterministas se encuentran en:
@@ -299,8 +383,15 @@ app/
 │   └── studio.tsx                   # Rutas A y B de anuncios
 ├── recreador/                        # Tandas de productos y referencias
 ├── fichas/                           # Redactor y biblioteca de propiedades
+├── biblioteca/                       # Proyectos, etiquetas y eliminación
+├── camara/                           # App 06: movimientos y exportación 9:16
+├── calendario/                       # App 07: planificación de contenido
 └── api/
+    ├── calendar/                     # Publicaciones programadas
+    ├── camera-presets/               # Movimientos propios
+    ├── clients/                      # Clientes y colores
     ├── jobs/                        # Generaciones inmobiliarias
+    ├── library/                     # Carpeta unificada por propiedad
     ├── prompts/                     # Presets de ambientes
     ├── properties/                  # Carpetas de propiedades
     ├── property-records/            # Fichas completas y reedición

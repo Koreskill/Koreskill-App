@@ -97,7 +97,8 @@ export async function ensureDbSchema() {
             created_at text DEFAULT CURRENT_TIMESTAMP NOT NULL,
             completed_at text
           )`,
-        ),        db.prepare(
+        ),
+        db.prepare(
           `CREATE TABLE IF NOT EXISTS generated_texts (
             id text PRIMARY KEY NOT NULL,
             owner text NOT NULL,
@@ -110,6 +111,48 @@ export async function ensureDbSchema() {
             input_tokens integer DEFAULT 0 NOT NULL,
             output_tokens integer DEFAULT 0 NOT NULL,
             estimated_cost_micros integer DEFAULT 0 NOT NULL,
+            created_at text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            updated_at text DEFAULT CURRENT_TIMESTAMP NOT NULL
+          )`,
+        ),
+        db.prepare(
+          `CREATE TABLE IF NOT EXISTS clients (
+            id text PRIMARY KEY NOT NULL,
+            owner text NOT NULL,
+            name text NOT NULL,
+            color text DEFAULT '#2563eb' NOT NULL,
+            created_at text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            updated_at text DEFAULT CURRENT_TIMESTAMP NOT NULL
+          )`,
+        ),
+        db.prepare(
+          `CREATE TABLE IF NOT EXISTS calendar_items (
+            id text PRIMARY KEY NOT NULL,
+            owner text NOT NULL,
+            client_id text REFERENCES clients(id) ON DELETE SET NULL,
+            property_id text REFERENCES properties(id) ON DELETE SET NULL,
+            title text NOT NULL,
+            content_type text DEFAULT 'post' NOT NULL,
+            channel text DEFAULT 'Instagram' NOT NULL,
+            scheduled_for text NOT NULL,
+            status text DEFAULT 'planned' NOT NULL,
+            notes text,
+            created_at text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            updated_at text DEFAULT CURRENT_TIMESTAMP NOT NULL
+          )`,
+        ),
+        db.prepare(
+          `CREATE TABLE IF NOT EXISTS camera_presets (
+            id text PRIMARY KEY NOT NULL,
+            owner text NOT NULL,
+            name text NOT NULL,
+            horizontal real DEFAULT 0 NOT NULL,
+            vertical real DEFAULT 0 NOT NULL,
+            zoom real DEFAULT 0 NOT NULL,
+            pan real DEFAULT 0 NOT NULL,
+            tilt real DEFAULT 0 NOT NULL,
+            rotate real DEFAULT 0 NOT NULL,
+            duration_seconds real DEFAULT 5 NOT NULL,
             created_at text DEFAULT CURRENT_TIMESTAMP NOT NULL,
             updated_at text DEFAULT CURRENT_TIMESTAMP NOT NULL
           )`,
@@ -206,6 +249,27 @@ export async function ensureDbSchema() {
         ),
         db.prepare(
           "CREATE INDEX IF NOT EXISTS generated_texts_owner_created_idx ON generated_texts (owner, created_at)",
+        ),
+        db.prepare(
+          "CREATE UNIQUE INDEX IF NOT EXISTS clients_owner_name_idx ON clients (owner, name)",
+        ),
+        db.prepare(
+          "CREATE INDEX IF NOT EXISTS clients_owner_created_idx ON clients (owner, created_at)",
+        ),
+        db.prepare(
+          "CREATE INDEX IF NOT EXISTS calendar_items_owner_date_idx ON calendar_items (owner, scheduled_for)",
+        ),
+        db.prepare(
+          "CREATE INDEX IF NOT EXISTS calendar_items_client_idx ON calendar_items (client_id)",
+        ),
+        db.prepare(
+          "CREATE INDEX IF NOT EXISTS calendar_items_property_idx ON calendar_items (property_id)",
+        ),
+        db.prepare(
+          "CREATE UNIQUE INDEX IF NOT EXISTS camera_presets_owner_name_idx ON camera_presets (owner, name)",
+        ),
+        db.prepare(
+          "CREATE INDEX IF NOT EXISTS camera_presets_owner_created_idx ON camera_presets (owner, created_at)",
         ),
       ]);
     })().catch((error: unknown) => {

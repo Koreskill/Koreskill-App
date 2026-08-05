@@ -221,6 +221,50 @@
   font-size: 12px;
 }
 
+.libraryTools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.clientFilter {
+  min-height: 44px;
+  padding: 0 11px;
+  border: 1px solid #dfe4ea;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #7a8390;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.clientFilter select {
+  max-width: 155px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #4f5762;
+  font: inherit;
+  font-size: 10px;
+}
+
+.newClientButton {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid #cfe0ff;
+  border-radius: 12px;
+  background: #f3f7ff;
+  color: #2563eb;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 750;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -244,6 +288,12 @@
   transform: translateY(-3px);
   border-color: #b8cffb;
   box-shadow: 0 18px 40px rgba(21, 35, 56, 0.1);
+}
+
+.cardLink {
+  color: inherit;
+  text-decoration: none;
+  display: block;
 }
 
 .preview {
@@ -354,6 +404,57 @@
   white-space: nowrap;
 }
 
+.cardActions {
+  min-height: 49px;
+  padding: 8px 11px 10px 16px;
+  border-top: 1px solid #edf0f3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cardActions label {
+  min-width: 0;
+  flex: 1;
+  color: #7b8490;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cardActions select {
+  min-width: 0;
+  max-width: 190px;
+  height: 31px;
+  padding: 0 7px;
+  border: 1px solid #e0e4e9;
+  border-radius: 8px;
+  outline: 0;
+  background: #fafbfc;
+  color: #59616c;
+  font: inherit;
+  font-size: 9px;
+}
+
+.trashButton {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  border: 1px solid #fee2e2;
+  border-radius: 9px;
+  background: #fff8f8;
+  color: #c2413a;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.trashButton:hover {
+  border-color: #fca5a5;
+  background: #fff1f2;
+}
+
 .loading,
 .empty {
   min-height: 320px;
@@ -401,6 +502,186 @@
   background: #fff1f2;
   color: #b42318;
   font-size: 11px;
+}
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  padding: 22px;
+  background: rgba(17, 20, 26, 0.64);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+}
+
+.confirmModal,
+.clientModal {
+  width: min(460px, 100%);
+  padding: 24px;
+  border-radius: 19px;
+  background: #ffffff;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+}
+
+.dangerIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  background: #fff1f2;
+  color: #c23e36;
+  display: grid;
+  place-items: center;
+}
+
+.confirmModal h2 {
+  margin: 16px 0 8px;
+  font-size: 22px;
+}
+
+.confirmModal p {
+  margin: 0;
+  color: #707883;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.confirmModal > div:last-child {
+  margin-top: 22px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.confirmModal > div:last-child button,
+.createClientButton {
+  min-height: 40px;
+  padding: 0 13px;
+  border: 1px solid #dfe3e8;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #555d68;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.confirmModal > div:last-child .confirmDelete {
+  border-color: #c83b35;
+  background: #c83b35;
+  color: #ffffff;
+}
+
+.confirmModal button:disabled,
+.createClientButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.clientModal header {
+  padding-bottom: 17px;
+  border-bottom: 1px solid #edf0f3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.clientModal header > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.clientModal header span,
+.clientModal > label > span,
+.colorPicker > span {
+  color: #2563eb;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.clientModal h2 {
+  margin: 0;
+  font-size: 21px;
+}
+
+.clientModal header > button {
+  width: 35px;
+  height: 35px;
+  border: 1px solid #e1e5e9;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #6d7580;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.clientModal > label {
+  margin: 19px 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.clientModal > label input {
+  height: 42px;
+  padding: 0 11px;
+  border: 1px solid #dfe3e8;
+  border-radius: 10px;
+  outline: 0;
+  font: inherit;
+  font-size: 11px;
+}
+
+.clientModal > label input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.colorPicker > div {
+  margin-top: 9px;
+  display: flex;
+  gap: 8px;
+}
+
+.colorPicker button {
+  width: 31px;
+  height: 31px;
+  border: 3px solid #ffffff;
+  border-radius: 9px;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px #dfe3e8;
+}
+
+.colorPicker .selectedColor {
+  box-shadow: 0 0 0 2px #17191d;
+}
+
+.createClientButton {
+  width: 100%;
+  margin-top: 21px;
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+}
+
+@media (max-width: 1120px) {
+  .libraryHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .libraryTools {
+    justify-content: flex-start;
+  }
 }
 
 @media (max-width: 980px) {
@@ -461,6 +742,25 @@
 
   .search {
     width: 100%;
+  }
+
+  .libraryTools {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .clientFilter {
+    flex: 1;
+  }
+
+  .search {
+    order: 3;
+    flex-basis: 100%;
+  }
+
+  .confirmModal > div:last-child {
+    align-items: stretch;
+    flex-direction: column-reverse;
   }
 
   .grid {

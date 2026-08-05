@@ -78,6 +78,8 @@ En `.env` debe estar:
 REPLICATE_API_TOKEN=r8_TU_TOKEN_REAL
 NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=tu_clave_publicable
+OPENAI_API_KEY=sk_TU_CLAVE_REAL
+OPENAI_TEXT_MODEL=TU_MODELO_DE_TEXTO
 ```
 
 El archivo `.env` está ignorado por Git y no debe subirse.
@@ -147,6 +149,8 @@ Dentro del servicio Compose:
    REPLICATE_API_TOKEN=r8_TU_TOKEN_REAL
    NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=tu_clave_publicable
+   OPENAI_API_KEY=sk_TU_CLAVE_REAL
+   OPENAI_TEXT_MODEL=TU_MODELO_DE_TEXTO
    ```
 
 3. Guardar.

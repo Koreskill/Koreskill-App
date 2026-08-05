@@ -1,6 +1,7 @@
 import { desc, eq } from "drizzle-orm";
 import { ensureDbSchema, getDb } from "@/db";
 import {
+  clients,
   generatedTexts,
   generationRuns,
   imageJobs,
@@ -60,6 +61,14 @@ export async function GET() {
       })
       .from(generatedTexts)
       .where(eq(generatedTexts.owner, owner));
+
+    const clientRows = await db
+      .select({ name: clients.name, color: clients.color })
+      .from(clients)
+      .where(eq(clients.owner, owner));
+    const clientColors = new Map(
+      clientRows.map((client) => [client.name, client.color]),
+    );
 
     const projects = propertyRows.map((property) => {
       const projectJobs = jobRows.filter(
@@ -167,6 +176,9 @@ export async function GET() {
         address: property.address || "",
         zone: property.zone || "",
         client: property.client || "",
+        clientColor: property.client
+          ? clientColors.get(property.client) || "#64748b"
+          : "",
         type: property.type || "",
         operation: property.operation || "",
         imageCount: projectJobs.length,

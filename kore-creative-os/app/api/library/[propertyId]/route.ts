@@ -1,6 +1,7 @@
 import { and, desc, eq } from "drizzle-orm";
 import { ensureDbSchema, getDb } from "@/db";
 import {
+  clients,
   generatedTexts,
   generationRuns,
   imageJobs,
@@ -10,6 +11,8 @@ import {
   ownerFromRequest,
   publicJob,
 } from "@/lib/jobs";
+import { getBucket } from "@/lib/runtime";
+import { getRuntimeBindings } from "@/lib/worker-env";
 
 function parseHighlights(value: string | null) {
   try {
@@ -263,6 +266,182 @@ export async function GET(
       {
         status: 500,
       },
+    );
+  }
+}
+
+export async function PATCH(
+  request: Request,
+  context: {
+    params: Promise<{
+      propertyId: string;
+    }>;
+  },
+) {
+  try {
+    await ensureDbSchema();
+    const owner = await ownerFromRequest();
+    const { propertyId } = await context.params;
+    const payload = (await request.json()) as {
+      clientId?: unknown;
+    };
+    const clientId =
+      typeof payload.clientId === "string" && payload.clientId
+        ? payload.clientId
+        : null;
+    const db = getDb();
+
+    const [property] = await db
+      .select({ id: properties.id })
+      .from(properties)
+      .where(
+        and(eq(properties.id, propertyId), eq(properties.owner, owner)),
+      )
+      .limit(1);
+
+    if (!property) {
+      return Response.json(
+        { error: "La propiedad no existe." },
+        { status: 404 },
+      );
+    }
+
+    const [client] = clientId
+      ? await db
+          .select()
+          .from(clients)
+          .where(and(eq(clients.id, clientId), eq(clients.owner, owner)))
+          .limit(1)
+      : [null];
+
+    if (clientId && !client) {
+      return Response.json(
+        { error: "El cliente seleccionado no existe." },
+        { status: 400 },
+      );
+    }
+
+    const updatedAt = new Date().toISOString();
+    await db
+      .update(properties)
+      .set({ client: client?.name || null, updatedAt })
+      .where(
+        and(eq(properties.id, propertyId), eq(properties.owner, owner)),
+      );
+
+    return Response.json({
+      property: {
+        id: propertyId,
+        client: client?.name || "",
+        clientColor: client?.color || "",
+        updatedAt,
+      },
+    });
+  } catch (error) {
+    console.error("Library project label update failed", error);
+    return Response.json(
+      { error: "No se pudo actualizar el cliente del proyecto." },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  context: {
+    params: Promise<{
+      propertyId: string;
+    }>;
+  },
+) {
+  void request;
+
+  try {
+    await ensureDbSchema();
+    const owner = await ownerFromRequest();
+    const { propertyId } = await context.params;
+    const db = getDb();
+
+    const [property] = await db
+      .select({ id: properties.id, name: properties.name })
+      .from(properties)
+      .where(
+        and(eq(properties.id, propertyId), eq(properties.owner, owner)),
+      )
+      .limit(1);
+
+    if (!property) {
+      return Response.json(
+        { error: "La carpeta no existe o no te pertenece." },
+        { status: 404 },
+      );
+    }
+
+    const jobs = await db
+      .select({ inputKey: imageJobs.inputKey, outputKey: imageJobs.outputKey })
+      .from(imageJobs)
+      .where(
+        and(eq(imageJobs.propertyId, propertyId), eq(imageJobs.owner, owner)),
+      );
+
+    const binding = getRuntimeBindings().DB;
+    if (!binding) {
+      throw new Error("La base de datos no está disponible.");
+    }
+
+    const now = new Date().toISOString();
+    await binding.batch([
+      binding
+        .prepare(
+          "UPDATE calendar_items SET property_id = NULL, updated_at = ? WHERE property_id = ? AND owner = ?",
+        )
+        .bind(now, propertyId, owner),
+      binding
+        .prepare(
+          "DELETE FROM generation_runs WHERE property_id = ? AND owner = ?",
+        )
+        .bind(propertyId, owner),
+      binding
+        .prepare(
+          "DELETE FROM generated_texts WHERE property_id = ? AND owner = ?",
+        )
+        .bind(propertyId, owner),
+      binding
+        .prepare("DELETE FROM image_jobs WHERE property_id = ? AND owner = ?")
+        .bind(propertyId, owner),
+      binding
+        .prepare("DELETE FROM properties WHERE id = ? AND owner = ?")
+        .bind(propertyId, owner),
+    ]);
+
+    const storageKeys = Array.from(
+      new Set(
+        jobs.flatMap((job) => [job.inputKey, job.outputKey]).filter(Boolean),
+      ),
+    ) as string[];
+    let cleanupPending = false;
+
+    if (storageKeys.length) {
+      try {
+        await getBucket().delete(storageKeys);
+      } catch (storageError) {
+        cleanupPending = true;
+        console.error("Project file cleanup failed", storageError);
+      }
+    }
+
+    return Response.json({
+      deleted: true,
+      id: propertyId,
+      name: property.name,
+      deletedFileCount: storageKeys.length,
+      cleanupPending,
+    });
+  } catch (error) {
+    console.error("Library project deletion failed", error);
+    return Response.json(
+      { error: "No se pudo eliminar la carpeta." },
+      { status: 500 },
     );
   }
 }

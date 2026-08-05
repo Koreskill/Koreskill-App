@@ -2875,3 +2875,31 @@ a.app-card:hover {
 .app-card-green footer {
   color: #168447;
 }
+
+.app-card-indigo::before {
+  background: rgba(99, 63, 204, 0.11);
+}
+
+.app-card-indigo .app-card-icon,
+.app-card-indigo .app-status {
+  background: #f0ebff;
+  color: #6d35cc;
+}
+
+.app-card-indigo footer {
+  color: #6d35cc;
+}
+
+.app-card-coral::before {
+  background: rgba(226, 92, 66, 0.11);
+}
+
+.app-card-coral .app-card-icon,
+.app-card-coral .app-status {
+  background: #fff0eb;
+  color: #c94f38;
+}
+
+.app-card-coral footer {
+  color: #c94f38;
+}

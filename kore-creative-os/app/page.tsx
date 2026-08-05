@@ -2,6 +2,8 @@ import Link from "next/link";
 import {
   ArrowRight,
   Building2,
+  CalendarDays,
+  Camera,
   FilePenLine,
   LibraryBig,
   Megaphone,
@@ -30,8 +32,8 @@ export default function Home() {
         <h1>Un sistema para cada parte del proceso creativo.</h1>
         <p>
           Elegí una herramienta, cargá el material y seguí un flujo de trabajo
-          repetible. Todas las aplicaciones usan la misma conexión segura con
-          Replicate.
+          repetible. Todas comparten el mismo acceso seguro, clientes y
+          biblioteca de trabajo.
         </p>
       </section>
 
@@ -157,6 +159,44 @@ export default function Home() {
 
           <footer>
             <span>Abrir la biblioteca</span>
+            <ArrowRight size={17} />
+          </footer>
+        </Link>
+
+        <Link href="/camara" className="app-card app-card-indigo">
+          <span className="app-card-icon">
+            <Camera size={25} />
+          </span>
+          <span className="app-status">Nueva</span>
+          <div>
+            <span className="app-number">06</span>
+            <h2>Cámara inmobiliaria</h2>
+            <p>
+              Convertí una foto en un clip 9:16 con presets de movimiento,
+              controles avanzados y movimientos propios reutilizables.
+            </p>
+          </div>
+          <footer>
+            <span>Animar una propiedad</span>
+            <ArrowRight size={17} />
+          </footer>
+        </Link>
+
+        <Link href="/calendario" className="app-card app-card-coral">
+          <span className="app-card-icon">
+            <CalendarDays size={25} />
+          </span>
+          <span className="app-status">Nueva</span>
+          <div>
+            <span className="app-number">07</span>
+            <h2>Calendario de contenidos</h2>
+            <p>
+              Organizá qué publicar, cuándo hacerlo y para qué cliente,
+              vinculando cada entrega con su propiedad.
+            </p>
+          </div>
+          <footer>
+            <span>Planificar publicaciones</span>
             <ArrowRight size={17} />
           </footer>
         </Link>

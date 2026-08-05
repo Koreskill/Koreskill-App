@@ -9,7 +9,12 @@ import {
   Images,
   LibraryBig,
   LoaderCircle,
+  Plus,
   Search,
+  Tag,
+  Trash2,
+  Users,
+  X,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -28,6 +33,7 @@ type LibraryProject = {
   address: string;
   zone: string;
   client: string;
+  clientColor: string;
   type: string;
   operation: string;
   imageCount: number;
@@ -43,6 +49,12 @@ type LibraryProject = {
   thumbnailUrl: string | null;
   createdAt: string;
   updatedAt: string;
+};
+
+type Client = {
+  id: string;
+  name: string;
+  color: string;
 };
 
 type LibraryTotals = {
@@ -107,24 +119,42 @@ export function LibraryScreen() {
     useState<LibraryTotals>(EMPTY_TOTALS);
 
   const [search, setSearch] = useState("");
+  const [clientFilter, setClientFilter] = useState("");
+  const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deleteTarget, setDeleteTarget] =
+    useState<LibraryProject | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [taggingId, setTaggingId] = useState("");
+  const [clientModal, setClientModal] = useState(false);
+  const [savingClient, setSavingClient] = useState(false);
+  const [newClient, setNewClient] = useState({
+    name: "",
+    color: "#2563eb",
+  });
 
   useEffect(() => {
     let active = true;
 
     async function loadLibrary() {
       try {
-        const response = await fetch("/api/library", {
-          cache: "no-store",
-        });
+        const [response, clientsResponse] = await Promise.all([
+          fetch("/api/library", { cache: "no-store" }),
+          fetch("/api/clients", { cache: "no-store" }),
+        ]);
 
-        const payload =
-          (await response.json()) as LibraryResponse;
+        const [payload, clientsPayload] = await Promise.all([
+          response.json() as Promise<LibraryResponse>,
+          clientsResponse.json() as Promise<{
+            clients?: Client[];
+            error?: string;
+          }>,
+        ]);
 
-        if (!response.ok) {
+        if (!response.ok || !clientsResponse.ok) {
           throw new Error(
-            payload.error ||
+            payload.error || clientsPayload.error ||
               "No se pudo cargar la biblioteca.",
           );
         }
@@ -132,6 +162,7 @@ export function LibraryScreen() {
         if (active) {
           setProjects(payload.projects || []);
           setTotals(payload.totals || EMPTY_TOTALS);
+          setClients(clientsPayload.clients || []);
         }
       } catch (loadError) {
         if (active) {
@@ -158,25 +189,179 @@ export function LibraryScreen() {
   const visibleProjects = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    if (!query) {
-      return projects;
-    }
+    return projects.filter((project) => {
+      const matchesClient =
+        !clientFilter || project.client === clientFilter;
+      const matchesSearch =
+        !query ||
+        [
+          project.name,
+          project.title,
+          project.address,
+          project.zone,
+          project.client,
+          project.type,
+          project.operation,
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(query);
 
-    return projects.filter((project) =>
-      [
-        project.name,
-        project.title,
-        project.address,
-        project.zone,
-        project.client,
-        project.type,
-        project.operation,
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(query),
-    );
-  }, [projects, search]);
+      return matchesClient && matchesSearch;
+    });
+  }, [clientFilter, projects, search]);
+
+  async function assignClient(
+    projectId: string,
+    clientId: string,
+  ) {
+    setTaggingId(projectId);
+    setError("");
+
+    try {
+      const response = await fetch(
+        `/api/library/${encodeURIComponent(projectId)}`,
+        {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ clientId: clientId || null }),
+        },
+      );
+      const payload = (await response.json()) as {
+        property?: {
+          client: string;
+          clientColor: string;
+          updatedAt: string;
+        };
+        error?: string;
+      };
+
+      if (!response.ok || !payload.property) {
+        throw new Error(
+          payload.error || "No se pudo aplicar la etiqueta.",
+        );
+      }
+
+      setProjects((current) =>
+        current.map((project) =>
+          project.id === projectId
+            ? { ...project, ...payload.property }
+            : project,
+        ),
+      );
+    } catch (assignError) {
+      setError(
+        assignError instanceof Error
+          ? assignError.message
+          : "No se pudo aplicar la etiqueta.",
+      );
+    } finally {
+      setTaggingId("");
+    }
+  }
+
+  async function deleteProject() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setError("");
+
+    try {
+      const response = await fetch(
+        `/api/library/${encodeURIComponent(deleteTarget.id)}`,
+        { method: "DELETE" },
+      );
+      const payload = (await response.json()) as {
+        error?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(
+          payload.error || "No se pudo eliminar la carpeta.",
+        );
+      }
+
+      setProjects((current) =>
+        current.filter((project) => project.id !== deleteTarget.id),
+      );
+      setTotals((current) => ({
+        projects: Math.max(0, current.projects - 1),
+        images: Math.max(
+          0,
+          current.images - deleteTarget.generatedImageCount,
+        ),
+        texts: Math.max(0, current.texts - deleteTarget.textCount),
+        imageGenerations: Math.max(
+          0,
+          current.imageGenerations - deleteTarget.imageGenerationCount,
+        ),
+        textGenerations: Math.max(
+          0,
+          current.textGenerations - deleteTarget.textGenerationCount,
+        ),
+        inputTokens: Math.max(
+          0,
+          current.inputTokens - deleteTarget.inputTokens,
+        ),
+        outputTokens: Math.max(
+          0,
+          current.outputTokens - deleteTarget.outputTokens,
+        ),
+        spentMicros: Math.max(
+          0,
+          current.spentMicros - deleteTarget.totalSpentMicros,
+        ),
+      }));
+      setDeleteTarget(null);
+    } catch (deleteError) {
+      setError(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "No se pudo eliminar la carpeta.",
+      );
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  async function createClient() {
+    if (!newClient.name.trim()) return;
+    setSavingClient(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/clients", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(newClient),
+      });
+      const payload = (await response.json()) as {
+        client?: Client;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.client) {
+        throw new Error(
+          payload.error || "No se pudo crear el cliente.",
+        );
+      }
+
+      setClients((current) =>
+        [...current, payload.client as Client].sort((first, second) =>
+          first.name.localeCompare(second.name),
+        ),
+      );
+      setNewClient({ name: "", color: "#2563eb" });
+      setClientModal(false);
+    } catch (clientError) {
+      setError(
+        clientError instanceof Error
+          ? clientError.message
+          : "No se pudo crear el cliente.",
+      );
+    } finally {
+      setSavingClient(false);
+    }
+  }
 
   return (
     <main className={styles.shell}>
@@ -278,17 +463,45 @@ export function LibraryScreen() {
             <h2>Propiedades</h2>
           </div>
 
-          <label className={styles.search}>
-            <Search size={15} />
+          <div className={styles.libraryTools}>
+            <label className={styles.clientFilter}>
+              <Users size={14} />
+              <select
+                value={clientFilter}
+                onChange={(event) =>
+                  setClientFilter(event.target.value)
+                }
+              >
+                <option value="">Todos los clientes</option>
+                {clients.map((client) => (
+                  <option value={client.name} key={client.id}>
+                    {client.name}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-            <input
-              value={search}
-              onChange={(event) =>
-                setSearch(event.target.value)
-              }
-              placeholder="Buscar por dirección, cliente o zona..."
-            />
-          </label>
+            <button
+              type="button"
+              className={styles.newClientButton}
+              onClick={() => setClientModal(true)}
+            >
+              <Plus size={14} />
+              Cliente
+            </button>
+
+            <label className={styles.search}>
+              <Search size={15} />
+
+              <input
+                value={search}
+                onChange={(event) =>
+                  setSearch(event.target.value)
+                }
+                placeholder="Buscar propiedad..."
+              />
+            </label>
+          </div>
         </div>
 
         {error && (
@@ -306,12 +519,12 @@ export function LibraryScreen() {
         ) : visibleProjects.length ? (
           <div className={styles.grid}>
             {visibleProjects.map((project) => (
-              <Link
-                href={`/biblioteca/${project.id}`}
-                className={styles.card}
-                key={project.id}
-              >
-                <div className={styles.preview}>
+              <article className={styles.card} key={project.id}>
+                <Link
+                  href={`/biblioteca/${project.id}`}
+                  className={styles.cardLink}
+                >
+                  <div className={styles.preview}>
                   {project.thumbnailUrl ? (
                     <Image
                       src={project.thumbnailUrl}
@@ -334,9 +547,9 @@ export function LibraryScreen() {
                     <FolderOpen size={13} />
                     Proyecto
                   </span>
-                </div>
+                  </div>
 
-                <div className={styles.cardBody}>
+                  <div className={styles.cardBody}>
                   <div className={styles.cardTitle}>
                     <div>
                       <h3>
@@ -377,18 +590,77 @@ export function LibraryScreen() {
                     </span>
                   </div>
 
-                  <footer>
+                    <footer>
                     <span>
                       Actualizado{" "}
                       {formatDate(project.updatedAt)}
                     </span>
 
                     {project.client && (
-                      <strong>{project.client}</strong>
+                      <strong
+                        style={{
+                          color:
+                            project.clientColor || "#2563eb",
+                        }}
+                      >
+                        {project.client}
+                      </strong>
                     )}
-                  </footer>
+                    </footer>
+                  </div>
+                </Link>
+
+                <div className={styles.cardActions}>
+                  <label>
+                    <Tag size={13} />
+                    <select
+                      value={
+                        clients.find(
+                          (client) =>
+                            client.name === project.client,
+                        )?.id || ""
+                      }
+                      disabled={taggingId === project.id}
+                      onChange={(event) =>
+                        void assignClient(
+                          project.id,
+                          event.target.value,
+                        )
+                      }
+                      aria-label={`Cliente de ${
+                        project.title || project.name
+                      }`}
+                    >
+                      <option value="">Sin cliente</option>
+                      {project.client &&
+                        !clients.some(
+                          (client) =>
+                            client.name === project.client,
+                        ) && (
+                          <option value="" disabled>
+                            {project.client}
+                          </option>
+                        )}
+                      {clients.map((client) => (
+                        <option value={client.id} key={client.id}>
+                          {client.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <button
+                    type="button"
+                    className={styles.trashButton}
+                    onClick={() => setDeleteTarget(project)}
+                    aria-label={`Eliminar ${
+                      project.title || project.name
+                    }`}
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </div>
-              </Link>
+              </article>
             ))}
           </div>
         ) : (
@@ -415,6 +687,129 @@ export function LibraryScreen() {
           </div>
         )}
       </section>
+
+      {deleteTarget && (
+        <div className={styles.modalBackdrop}>
+          <div className={styles.confirmModal}>
+            <span className={styles.dangerIcon}>
+              <Trash2 size={20} />
+            </span>
+
+            <h2>¿Eliminar esta carpeta?</h2>
+            <p>
+              Se borrará <strong>{deleteTarget.title || deleteTarget.name}</strong>,
+              junto con sus imágenes, textos y registros de gasto. Esta acción
+              no se puede deshacer.
+            </p>
+
+            <div>
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                className={styles.confirmDelete}
+                onClick={() => void deleteProject()}
+                disabled={deleting}
+              >
+                {deleting ? (
+                  <LoaderCircle className="spin" size={14} />
+                ) : (
+                  <Trash2 size={14} />
+                )}
+                Eliminar definitivamente
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {clientModal && (
+        <div className={styles.modalBackdrop}>
+          <div className={styles.clientModal}>
+            <header>
+              <div>
+                <span>Etiqueta de cliente</span>
+                <h2>Crear cliente</h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setClientModal(false)}
+                aria-label="Cerrar"
+              >
+                <X size={17} />
+              </button>
+            </header>
+
+            <label>
+              <span>Nombre</span>
+              <input
+                value={newClient.name}
+                onChange={(event) =>
+                  setNewClient((current) => ({
+                    ...current,
+                    name: event.target.value,
+                  }))
+                }
+                placeholder="Ej.: Juri Brokers"
+                autoFocus
+              />
+            </label>
+
+            <div className={styles.colorPicker}>
+              <span>Color</span>
+              <div>
+                {[
+                  "#2563eb",
+                  "#7c3aed",
+                  "#0891b2",
+                  "#16a34a",
+                  "#ea580c",
+                  "#db2777",
+                ].map((color) => (
+                  <button
+                    type="button"
+                    key={color}
+                    aria-label={`Elegir ${color}`}
+                    style={{ background: color }}
+                    className={
+                      newClient.color === color
+                        ? styles.selectedColor
+                        : ""
+                    }
+                    onClick={() =>
+                      setNewClient((current) => ({
+                        ...current,
+                        color,
+                      }))
+                    }
+                  />
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className={styles.createClientButton}
+              onClick={() => void createClient()}
+              disabled={savingClient || !newClient.name.trim()}
+            >
+              {savingClient ? (
+                <LoaderCircle className="spin" size={14} />
+              ) : (
+                <Plus size={14} />
+              )}
+              Crear cliente
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
